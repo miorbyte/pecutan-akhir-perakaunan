@@ -192,10 +192,24 @@ section.active{display:block;}
 }
 .s-body{padding:18px;}
 .s-q{font-size:15.5px; margin:0 0 6px; font-weight:500; white-space:pre-line;}
+.s-answerbox{
+  width:100%; min-height:110px; margin-top:12px;
+  font-family:'IBM Plex Mono',monospace; font-size:13.5px;
+  background:#fff; border:1px solid var(--paper-line); border-radius:3px;
+  padding:12px; color:var(--ink); resize:vertical;
+}
+.s-answerbox:focus{outline:2px solid var(--brass); outline-offset:1px; border-color:var(--brass);}
+.s-hint{
+  font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);
+  margin:6px 0 0;
+}
 .s-toggle{
   margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:12.5px;
   background:var(--ink); color:var(--paper); border:none; padding:8px 14px;
   cursor:pointer; border-radius:2px;
+}
+.s-toggle:disabled{
+  background:var(--paper-line); color:var(--ink-soft); cursor:not-allowed;
 }
 .s-answer{
   display:none; margin-top:14px; padding:14px; background:#fff;
@@ -281,7 +295,7 @@ footer.note{
   <section id="subjektif">
     <div class="section-head">
       <h2>Bahagian B · Soalan Subjektif</h2>
-      <p>Cuba jawab di atas kertas dahulu, kemudian klik "Lihat Jawapan Model" untuk semak.</p>
+      <p>Taip jawapan anda dalam kotak yang disediakan. Butang "Lihat Jawapan Model" hanya aktif selepas anda menulis jawapan.</p>
     </div>
     <div id="subjList"></div>
   </section>
@@ -712,6 +726,8 @@ function updateScore(){
 /* ============================================================
    RENDER — BAHAGIAN B (SUBJEKTIF)
    ============================================================ */
+const MIN_ANSWER_LEN = 15; // minimum characters before "Lihat Jawapan Model" is enabled
+
 function renderSubj(){
   const list = document.getElementById('subjList');
   list.innerHTML = "";
@@ -722,13 +738,30 @@ function renderSubj(){
       <div class="q-meta"><span>${item.topic}</span><span>Soalan ${idx+1} / ${subjData.length} &middot; ${item.marks} markah</span></div>
       <div class="s-body">
         <p class="s-q">${item.q}</p>
-        <button class="s-toggle" data-idx="${idx}">Lihat Jawapan Model</button>
+        <textarea class="s-answerbox" id="input-${idx}" placeholder="Taip jawapan anda di sini dahulu..."></textarea>
+        <p class="s-hint" id="hint-${idx}">Tulis jawapan anda dahulu untuk membuka jawapan model.</p>
+        <button class="s-toggle" data-idx="${idx}" disabled>Lihat Jawapan Model</button>
         <div class="s-answer" id="ans-${idx}"><pre>${item.ans}</pre></div>
       </div>`;
     list.appendChild(card);
   });
+
+  list.querySelectorAll('.s-answerbox').forEach(box=>{
+    box.addEventListener('input', ()=>{
+      const idx = box.id.split('-')[1];
+      const btn = list.querySelector(`.s-toggle[data-idx="${idx}"]`);
+      const hint = document.getElementById('hint-'+idx);
+      const ready = box.value.trim().length >= MIN_ANSWER_LEN;
+      btn.disabled = !ready;
+      hint.textContent = ready
+        ? "Jawapan anda dah cukup panjang — sedia untuk semak."
+        : `Tulis jawapan anda dahulu untuk membuka jawapan model. (${box.value.trim().length}/${MIN_ANSWER_LEN})`;
+    });
+  });
+
   list.querySelectorAll('.s-toggle').forEach(btn=>{
     btn.addEventListener('click', ()=>{
+      if(btn.disabled) return;
       const idx = btn.dataset.idx;
       const box = document.getElementById('ans-'+idx);
       const showing = box.classList.toggle('show');
@@ -757,7 +790,11 @@ document.getElementById('resetBtn').addEventListener('click', ()=>{
   renderMCQ();
   updateScore();
   document.querySelectorAll('.s-answer').forEach(a=>a.classList.remove('show'));
-  document.querySelectorAll('.s-toggle').forEach(b=>b.textContent = "Lihat Jawapan Model");
+  document.querySelectorAll('.s-toggle').forEach(b=>{ b.textContent = "Lihat Jawapan Model"; b.disabled = true; });
+  document.querySelectorAll('.s-answerbox').forEach(box=>{ box.value = ""; });
+  document.querySelectorAll('[id^="hint-"]').forEach(h=>{
+    h.textContent = `Tulis jawapan anda dahulu untuk membuka jawapan model. (0/${MIN_ANSWER_LEN})`;
+  });
 });
 
 /* ============================================================

@@ -221,6 +221,67 @@ section.active{display:block;}
   margin:0; line-height:1.6;
 }
 
+/* ---------- STRUCTURED ANSWER TEMPLATES ---------- */
+.tmpl-wrap{margin-top:14px;}
+.tmpl-block-title{
+  font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:700;
+  color:var(--ink-soft); text-transform:uppercase; letter-spacing:.06em;
+  margin:16px 0 8px;
+}
+.tmpl-block-title:first-child{margin-top:0;}
+.tmpl-heading{
+  text-align:center; font-family:'Spectral',serif; font-style:italic; font-weight:600;
+  font-size:14.5px; margin-bottom:10px; color:var(--ink);
+}
+.tmpl-table{
+  width:100%; border-collapse:collapse; font-size:13px; margin-bottom:14px;
+  background:#fff;
+}
+.tmpl-table th, .tmpl-table td{
+  border:1px solid var(--paper-line); padding:6px 8px; text-align:left; vertical-align:middle;
+}
+.tmpl-table th{
+  background:rgba(169,131,46,.10); font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft);
+}
+.tmpl-statement-row.header td{
+  border:none; border-top:1px solid var(--paper-line); font-style:italic; font-weight:600;
+  font-family:'Spectral',serif; padding-top:12px; background:transparent;
+}
+.tmpl-statement-row.bold td{font-weight:700;}
+.tmpl-input{
+  border:none; border-bottom:1px solid var(--paper-line); background:transparent;
+  font-family:'IBM Plex Mono',monospace; font-size:13px; padding:4px 2px;
+  width:100%; color:var(--ink);
+}
+.tmpl-input:focus{outline:none; border-bottom:1px solid var(--brass); background:rgba(169,131,46,.06);}
+.tmpl-input.num{text-align:right;}
+.tmpl-label-side{
+  font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:11px; margin-right:6px;
+}
+.tmpl-label-side.dt{color:var(--debit);}
+.tmpl-label-side.kt{color:var(--credit);}
+.tmpl-ledger{
+  display:grid; grid-template-columns:1fr 1fr;
+  border:1px solid var(--paper-line); margin-bottom:16px; background:#fff;
+}
+.tmpl-ledger-title{
+  grid-column:1 / -1; text-align:center; font-family:'Spectral',serif; font-style:italic;
+  font-weight:600; font-size:14px; padding:9px; border-bottom:1px solid var(--paper-line);
+  background:rgba(169,131,46,.08);
+}
+.tmpl-ledger .side{padding:0;}
+.tmpl-ledger .side.debit{border-right:1px solid var(--paper-line);}
+.tmpl-ledger .tmpl-table{margin-bottom:0; border:none;}
+.tmpl-blanks{display:flex; flex-direction:column; gap:10px; margin-bottom:8px;}
+.tmpl-blank-row{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  border-bottom:1px dashed var(--paper-line); padding-bottom:8px;
+}
+.tmpl-blank-row label{font-size:14px; flex:1 1 260px; color:var(--ink);}
+.tmpl-blank-row .tmpl-unit{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-soft);}
+.tmpl-blank-row .tmpl-input{width:130px; flex:0 0 130px;}
+
 /* ---------- FOOTER SCORE BAR ---------- */
 .floatbar{
   position:sticky; bottom:0; left:0; right:0;
@@ -295,7 +356,7 @@ footer.note{
   <section id="subjektif">
     <div class="section-head">
       <h2>Bahagian B · Soalan Subjektif</h2>
-      <p>Taip jawapan anda dalam kotak yang disediakan. Butang "Lihat Jawapan Model" hanya aktif selepas anda menulis jawapan.</p>
+      <p>Bagi soalan yang memerlukan jurnal, lejar akaun-T, imbangan duga, penyata pendapatan atau kunci kira-kira, isi terus ke dalam templat berformat di bawah. Bagi soalan lain, taip jawapan dalam kotak yang disediakan. Butang "Lihat Jawapan Model" hanya aktif selepas ruangan jawapan diisi secukupnya.</p>
     </div>
     <div id="subjList"></div>
   </section>
@@ -413,6 +474,10 @@ const mcqData = [
 
 /* ============================================================
    DATA — 16 SOALAN SUBJEKTIF
+   Item yang memerlukan format berstruktur (jurnal / lejar akaun-T /
+   imbangan duga / penyata pendapatan / kunci kira-kira) diberikan
+   ciri `template`, yang dibaca oleh renderTemplateBlocks() untuk
+   membina ruangan isian berformat menggantikan kotak teks bebas.
    ============================================================ */
 const subjData = [
 {topic:"Konsep Asas", marks:4, q:"Berikan definisi bagi:\n(i) Perakaunan Asas Tunai\n(ii) Perakaunan Asas Akruan",
@@ -433,6 +498,14 @@ ans:`(i) Hutang Lapuk — jumlah hutang daripada penghutang yang disahkan TIDAK 
 (ii) Peruntukan Hutang Ragu — anggaran jumlah (biasanya %) daripada baki penghutang yang DIJANGKA tidak dapat dikutip pada masa hadapan, diwujudkan secara berhemat (prudence) walaupun belum pasti hutang lapuk. (2M)`},
 
 {topic:"Dokumen & Jurnal", marks:6, q:"Perniagaan Aiman Enterprise telah melakukan urus niaga berikut pada bulan Mei 2025. Sediakan Jurnal Am (tanpa naratif diperlukan):\n\nMei 2 — Membeli perabot RM3,500 dan membayar dengan cek.\nMei 9 — Membeli barang niaga RM6,200 secara kredit daripada Kedai Ihsan.\nMei 20 — Menjual barang niaga RM4,000 secara tunai.\nMei 28 — Mengambil barang niaga bernilai RM250 untuk kegunaan sendiri.",
+template:{ blocks:[
+  {type:'journal', rows:[
+    {tarikh:'Mei 2', side:'dt'}, {tarikh:'', side:'kt'},
+    {tarikh:'Mei 9', side:'dt'}, {tarikh:'', side:'kt'},
+    {tarikh:'Mei 20', side:'dt'}, {tarikh:'', side:'kt'},
+    {tarikh:'Mei 28', side:'dt'}, {tarikh:'', side:'kt'}
+  ]}
+]},
 ans:`Jurnal Am
 ─────────────────────────────────────────────
 Mei 2   Dt Perabot                 3,500
@@ -454,6 +527,9 @@ Mei 28  Dt Ambilan                    250
 (Setiap pasangan catatan betul = 1.5M; 4 urus niaga × 1.5M = 6M)`},
 
 {topic:"Imbangan Duga", marks:14, q:"Maklumat berikut diperoleh daripada Perniagaan Cahaya Niaga pada 31 Mac 2025:\n\nTunai di tangan  RM2,850\nTunai di bank  RM9,400\nKenderaan  RM32,000\nModal  RM45,000\nBelian  RM8,900\nJualan  RM12,600\nPenghutang  RM4,150\nPemiutang  RM3,600\nGaji  RM1,850\nSewa diterima  RM650\nAlatan pejabat  RM3,700\n\nAnda dikehendaki menyediakan Imbangan Duga pada 31 Mac 2025.",
+template:{ blocks:[
+  {type:'trial_balance', accounts:['Tunai di tangan','Tunai di bank','Kenderaan','Modal','Belian','Jualan','Penghutang','Pemiutang','Gaji','Sewa diterima','Alatan pejabat']}
+]},
 ans:`Perniagaan Cahaya Niaga
 Imbangan Duga pada 31 Mac 2025
 ─────────────────────────────────────────────
@@ -481,6 +557,35 @@ ans:`Kategori: Aset (dan Belanja) — akaun yang bertambah nilai apabila didebit
 Contoh (mana-mana 2): Tunai, Bank, Penghutang, Kenderaan, Perabot, Belian, Gaji, Sewa (belanja). (1M)`},
 
 {topic:"Penyata Pendapatan", marks:16, q:"Maklumat berikut diperoleh daripada Kedai Selesa pada 31 Disember 2024:\n\nJualan  RM48,500\nBelian  RM24,600\nPulangan Jualan  RM900\nPulangan Belian  RM450\nStok Awal  RM5,800\nAngkutan Masuk  RM620\nAngkutan Keluar  RM380\nGaji  RM6,200\nSewa  RM3,600\nInsurans  RM1,150\nKomisen Diterima  RM540\nDiskaun Diberi  RM310\n\nMaklumat tambahan: Stok Akhir bernilai RM4,900.\n\nSediakan Penyata Pendapatan bagi tahun berakhir 31 Disember 2024.",
+template:{ blocks:[
+  {type:'statement', heading:'Kedai Selesa — Penyata Pendapatan bagi tahun berakhir 31 Disember 2024', rows:[
+    {label:'Jualan', c2:true},
+    {label:'(-) Pulangan Jualan', c1:true},
+    {label:'Jualan Bersih', c3:true, bold:true},
+    {label:'Tolak: Kos Jualan', header:true},
+    {label:'Stok Awal', c2:true, indent:1},
+    {label:'Belian', c1:true, indent:1},
+    {label:'(-) Pulangan Belian', c1:true, indent:2},
+    {label:'Belian Bersih', c1:true, indent:1},
+    {label:'(+) Angkutan Masuk', c1:true, indent:1},
+    {label:'Kos Belian', c2:true, indent:1},
+    {label:'Kos Barang Untuk Dijual', c2:true, indent:1},
+    {label:'(-) Stok Akhir', c2:true, indent:1},
+    {label:'Kos Jualan', c3:true},
+    {label:'Untung Kasar', c3:true, bold:true},
+    {label:'Tambah: Hasil Lain', header:true},
+    {label:'Komisen Diterima', c2:true, indent:1},
+    {label:'', c3:true},
+    {label:'Tolak: Belanja', header:true},
+    {label:'Angkutan Keluar', c1:true, indent:1},
+    {label:'Gaji', c1:true, indent:1},
+    {label:'Sewa', c1:true, indent:1},
+    {label:'Insurans', c1:true, indent:1},
+    {label:'Diskaun Diberi', c1:true, indent:1},
+    {label:'Jumlah Belanja', c2:true},
+    {label:'Untung Bersih', c3:true, bold:true}
+  ]}
+]},
 ans:`Kedai Selesa
 Penyata Pendapatan bagi tahun berakhir 31 Disember 2024
 ─────────────────────────────────────────────
@@ -490,13 +595,14 @@ Jualan                                   48,500
 Jualan Bersih                                       47,600
 
 Tolak: Kos Jualan
-Stok Awal                     5,800
-Belian              24,600
-(-) Pulangan Belian    450
-Belian Bersih                24,150
-(+) Angkutan Masuk              620
-                              30,570
-(-) Stok Akhir                4,900
+Stok Awal                                5,800
+Belian                         24,600
+(-) Pulangan Belian               450
+Belian Bersih                  24,150
+(+) Angkutan Masuk                620
+Kos Belian                              24,770
+Kos Barang Untuk Dijual                 30,570
+(-) Stok Akhir                           4,900
 Kos Jualan                                          25,670
 Untung Kasar                                        21,930
 
@@ -517,6 +623,12 @@ Untung Bersih                                       10,830
 Hasil Lain = 1M, Belanja = 5M, Untung Bersih = 1M; Jumlah = 16M)`},
 
 {topic:"Pelarasan", marks:6, q:"Perniagaan Delima membayar sewa kedai sebanyak RM7,200 pada 1 April 2024 untuk tempoh 12 bulan sehingga 31 Mac 2025. Tahun kewangan Perniagaan Delima berakhir pada 31 Disember 2024.\n\n(i) Hitungkan sewa yang perlu dicatat dalam Penyata Pendapatan bagi tahun berakhir 31 Disember 2024.\n(ii) Hitungkan sewa terdahulu yang perlu dicatat dalam Kunci Kira-Kira pada 31 Disember 2024.",
+template:{ blocks:[
+  {type:'blanks', items:[
+    {label:'(i) Sewa dicatat dalam Penyata Pendapatan bagi tahun berakhir 31 Disember 2024', unit:'RM'},
+    {label:'(ii) Sewa Terdahulu dicatat dalam Kunci Kira-Kira pada 31 Disember 2024', unit:'RM'}
+  ]}
+]},
 ans:`Kadar sewa sebulan = RM7,200 ÷ 12 bulan = RM600 sebulan
 
 (i) Tempoh yang telah berlalu (1 April – 31 Disember 2024) = 9 bulan
@@ -526,12 +638,24 @@ ans:`Kadar sewa sebulan = RM7,200 ÷ 12 bulan = RM600 sebulan
      Sewa Terdahulu dalam Kunci Kira-Kira (Aset Semasa) = 3 × RM600 = RM1,800 (3M)`},
 
 {topic:"Pelarasan", marks:4, q:"Sebuah mesin jahit dibeli dengan harga RM9,600 pada 1 Julai 2024 dan dibayar dengan cek. Mesin dijangka boleh digunakan selama 4 tahun tanpa nilai sisa. Susut nilai dikira mengikut kaedah garis lurus. Tahun kewangan perniagaan berakhir 31 Disember setiap tahun.\n\nHitungkan susut nilai bagi mesin tersebut pada tahun kewangan pertama (2024).",
+template:{ blocks:[
+  {type:'blanks', items:[
+    {label:'Susut nilai tahunan penuh (setahun)', unit:'RM'},
+    {label:'Susut nilai bagi tahun kewangan pertama (2024)', unit:'RM'}
+  ]}
+]},
 ans:`Susut nilai tahunan penuh = RM9,600 ÷ 4 tahun = RM2,400 setahun (2M)
 
 Tempoh digunakan pada 2024 = 1 Julai – 31 Disember = 6 bulan
 Susut nilai tahun pertama = RM2,400 × 6/12 = RM1,200 (2M)`},
 
 {topic:"Pelarasan", marks:8, q:"Belanja berikut dibayar oleh Perniagaan Ceria bagi tahun berakhir 31 Disember 2024:\n\nGaji dibayar  RM28,000\nKadar bayaran dibayar  RM4,200\n\nMaklumat tambahan:\n(i) Gaji terakru pada akhir tahun RM1,500.\n(ii) Kadar bayaran terdahulu pada akhir tahun RM600.\n\nSediakan Akaun Gaji dan Akaun Kadar Bayaran (tunjukkan pemindahan ke Penyata Pendapatan), lengkap dengan baki b/b.",
+template:{ blocks:[
+  {type:'ledger', accounts:[
+    {title:'Akaun Gaji', debitRows:2, creditRows:1, showTotal:true, showCarryDown:true, carrySide:'credit'},
+    {title:'Akaun Kadar Bayaran', debitRows:1, creditRows:2, showTotal:true, showCarryDown:true, carrySide:'debit'}
+  ]}
+]},
 ans:`Akaun Gaji
 ─────────────────────────────────────────────
         RM                              RM
@@ -555,6 +679,14 @@ Kadar Bayaran Terdahulu b/b   600
 (Jumlah dipindah ke Penyata Pendapatan = Kadar bayaran dibayar − Terdahulu = 4,200−600 = 3,600) (4M)`},
 
 {topic:"Pelarasan", marks:4, q:"Jumlah penghutang Perniagaan Nirmala pada 31 Disember 2024 ialah RM25,000. Seorang penghutang bernilai RM1,000 disahkan muflis dan hutangnya perlu dihapuskan sebagai hutang lapuk. Peruntukan hutang ragu diwujudkan sebanyak 4% daripada baki penghutang bersih.\n\n(i) Hitungkan peruntukan hutang ragu pada 31 Disember 2024.\n(ii) Tuliskan catatan bergu untuk merekodkan peruntukan hutang ragu tersebut.",
+template:{ blocks:[
+  {type:'blanks', title:'(i) Pengiraan', items:[
+    {label:'Peruntukan Hutang Ragu', unit:'RM'}
+  ]},
+  {type:'journal', title:'(ii) Catatan Bergu', rows:[
+    {tarikh:'', side:'dt'}, {tarikh:'', side:'kt'}
+  ]}
+]},
 ans:`(i) Penghutang bersih = RM25,000 − RM1,000 = RM24,000
     Peruntukan Hutang Ragu = 4% × RM24,000 = RM960 (2M)
 
@@ -563,6 +695,30 @@ ans:`(i) Penghutang bersih = RM25,000 − RM1,000 = RM24,000
     (2M)`},
 
 {topic:"Kunci Kira-Kira", marks:16, q:"Maklumat berikut diperoleh daripada Perniagaan Restu pada 31 Disember 2024:\n\nBank  RM6,300\nAmbilan  RM4,200\nPremis  RM55,000\nPemiutang  RM7,900\nPenghutang  RM9,600\nAlatan Pejabat  RM6,500\nKenderaan  RM22,000\nModal  RM70,000\n\nMaklumat tambahan:\n(i) Stok akhir pada 31 Disember 2024 bernilai RM8,200.\n(ii) Untung bersih daripada Penyata Pendapatan ialah RM24,300.\n\nSediakan Kunci Kira-Kira Perniagaan Restu pada 31 Disember 2024, dengan menunjukkan Modal Kerja.",
+template:{ blocks:[
+  {type:'statement', heading:'Perniagaan Restu — Kunci Kira-Kira pada 31 Disember 2024', rows:[
+    {label:'Aset Bukan Semasa', header:true},
+    {label:'Premis', c1:true, indent:1},
+    {label:'Kenderaan', c1:true, indent:1},
+    {label:'Alatan Pejabat', c1:true, indent:1},
+    {label:'', c2:true},
+    {label:'Aset Semasa', header:true},
+    {label:'Stok Akhir', c1:true, indent:1},
+    {label:'Penghutang', c1:true, indent:1},
+    {label:'Bank', c1:true, indent:1},
+    {label:'', c2:true, indent:1},
+    {label:'Tolak: Liabiliti Semasa', header:true},
+    {label:'Pemiutang', c2:true, indent:1},
+    {label:'Modal Kerja', c3:true},
+    {label:'Jumlah Aset', c3:true, bold:true},
+    {label:'Ekuiti Pemilik', header:true},
+    {label:'Modal Awal', c2:true, indent:1},
+    {label:'Tambah: Untung Bersih', c2:true, indent:1},
+    {label:'', c3:true},
+    {label:'Tolak: Ambilan', c2:true, indent:1},
+    {label:'Modal Akhir', c3:true, bold:true}
+  ]}
+]},
 ans:`Perniagaan Restu
 Kunci Kira-Kira pada 31 Disember 2024
 ─────────────────────────────────────────────
@@ -579,7 +735,7 @@ Penghutang              9,600
 Bank                    6,300
                         24,100
 Tolak: Liabiliti Semasa
-Pemiutang               7,900
+Pemiutang                7,900
 Modal Kerja                                16,200
 Jumlah Aset                                99,700
 ─────────────────────────────────────────────
@@ -608,6 +764,9 @@ ans:`Mana-mana 4 (1M setiap satu):
 • Membantu pihak berkepentingan (pemilik, bank, pelabur) menilai kestabilan kewangan perniagaan.`},
 
 {topic:"Konsep Asas", marks:6, q:"Terangkan TIGA (3) perbezaan antara Perakaunan Asas Tunai dengan Perakaunan Asas Akruan mengikut aspek berikut: Hasil, Belanja, dan Keuntungan.",
+template:{ blocks:[
+  {type:'comparison', col1:'Asas Tunai', col2:'Asas Akruan', rows:['Hasil','Belanja','Keuntungan']}
+]},
 ans:`Aspek       | Asas Tunai                              | Asas Akruan
 ────────────┼─────────────────────────────────────────┼──────────────────────────────────────────
 Hasil       | Direkod apabila tunai DITERIMA            | Direkod apabila hasil DIPEROLEH (walaupun tunai belum diterima)
@@ -617,6 +776,12 @@ Keuntungan  | Mungkin tidak menggambarkan prestasi sebenar tempoh berkenaan | Me
 (2M setiap baris perbezaan yang tepat × 3 = 6M)`},
 
 {topic:"Buku Tunai & Diskaun", marks:5, q:"Sebuah invois berjumlah RM6,500 dihantar kepada Puan Zaleha pada 3 Jun 2025. Syarat diskaun tunai ialah 4% jika dibayar dalam 20 hari, 2% jika dibayar dalam 30 hari.\n\n(i) Hitungkan jumlah yang perlu dibayar oleh Puan Zaleha jika beliau membayar pada 18 Jun 2025.\n(ii) Hitungkan jumlah yang perlu dibayar jika beliau membayar pada 28 Jun 2025.",
+template:{ blocks:[
+  {type:'blanks', items:[
+    {label:'(i) Jumlah dibayar jika bayar pada 18 Jun 2025', unit:'RM'},
+    {label:'(ii) Jumlah dibayar jika bayar pada 28 Jun 2025', unit:'RM'}
+  ]}
+]},
 ans:`(i) 18 Jun jatuh dalam tempoh 20 hari (3–23 Jun) → layak diskaun 4%
     Diskaun = 4% × RM6,500 = RM260
     Jumlah dibayar = RM6,500 − RM260 = RM6,240 (2.5M)
@@ -626,6 +791,12 @@ ans:`(i) 18 Jun jatuh dalam tempoh 20 hari (3–23 Jun) → layak diskaun 4%
      Jumlah dibayar = RM6,500 − RM130 = RM6,370 (2.5M)`},
 
 {topic:"Lejar", marks:6, q:"Pindahkan catatan Jurnal Am berikut ke dalam lejar (lukiskan akaun T ringkas untuk kedua-dua akaun):\n\nJurnal Am\nTarikh: 5 Feb 2025\nDt Kenderaan  RM28,000\n   Kt Auto Prima Sdn Bhd  RM28,000\n(Membeli kenderaan secara kredit)",
+template:{ blocks:[
+  {type:'ledger', accounts:[
+    {title:'Akaun Kenderaan', debitRows:1, creditRows:0, showTotal:false},
+    {title:'Akaun Auto Prima Sdn Bhd', debitRows:0, creditRows:1, showTotal:false}
+  ]}
+]},
 ans:`Akaun Kenderaan
 ─────────────────────────────────
 2025                        RM
@@ -724,9 +895,184 @@ function updateScore(){
 }
 
 /* ============================================================
+   RENDER — STRUCTURED ANSWER TEMPLATES (Bahagian B)
+   ============================================================ */
+function renderBlanksBlock(block, cardIdx, bIdx){
+  let html = "";
+  if(block.title) html += `<div class="tmpl-block-title">${block.title}</div>`;
+  html += `<div class="tmpl-blanks">`;
+  block.items.forEach((item, ii)=>{
+    const id = `t-${cardIdx}-${bIdx}-${ii}`;
+    html += `<div class="tmpl-blank-row">
+      <label>${item.label}</label>
+      <span class="tmpl-unit">${item.unit||''}</span>
+      <input type="text" class="tmpl-input num" id="${id}" data-card="${cardIdx}" placeholder="____">
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderJournalBlock(block, cardIdx, bIdx){
+  let html = "";
+  if(block.title) html += `<div class="tmpl-block-title">${block.title}</div>`;
+  html += `<table class="tmpl-table"><thead><tr>
+    <th style="width:70px;">Tarikh</th><th>Butiran</th>
+    <th style="width:90px;">Debit (RM)</th><th style="width:90px;">Kredit (RM)</th>
+  </tr></thead><tbody>`;
+  block.rows.forEach((r, ri)=>{
+    const idAcc = `t-${cardIdx}-${bIdx}-acc-${ri}`;
+    const idAmt = `t-${cardIdx}-${bIdx}-amt-${ri}`;
+    const sideLabel = r.side === 'dt'
+      ? '<span class="tmpl-label-side dt">Dt</span>'
+      : '<span class="tmpl-label-side kt">Kt</span>';
+    const indent = r.side === 'kt' ? 'padding-left:26px;' : '';
+    const tarikhCell = r.tarikh
+      ? r.tarikh
+      : `<input type="text" class="tmpl-input" style="width:100%;" placeholder="tarikh">`;
+    html += `<tr>
+      <td>${tarikhCell}</td>
+      <td style="${indent}">${sideLabel}<input type="text" class="tmpl-input" id="${idAcc}" data-card="${cardIdx}" placeholder="nama akaun" style="width:72%;display:inline-block;"></td>
+      <td>${r.side==='dt' ? `<input type="text" class="tmpl-input num" id="${idAmt}" data-card="${cardIdx}" placeholder="RM">` : ''}</td>
+      <td>${r.side==='kt' ? `<input type="text" class="tmpl-input num" id="${idAmt}" data-card="${cardIdx}" placeholder="RM">` : ''}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  return html;
+}
+
+function renderLedgerSide(side, acc, cardIdx, bIdx, ai, maxRows){
+  const rows = side === 'debit' ? (acc.debitRows||0) : (acc.creditRows||0);
+  let html = `<table class="tmpl-table"><thead><tr>
+    <th style="width:56px;">Tarikh</th><th>Butiran</th><th style="width:80px;">RM</th>
+  </tr></thead><tbody>`;
+  for(let i=0;i<rows;i++){
+    const idB = `t-${cardIdx}-${bIdx}-${ai}-${side}-b-${i}`;
+    const idA = `t-${cardIdx}-${bIdx}-${ai}-${side}-a-${i}`;
+    html += `<tr>
+      <td><input type="text" class="tmpl-input" style="width:100%;" placeholder="tarikh"></td>
+      <td><input type="text" class="tmpl-input" id="${idB}" data-card="${cardIdx}" placeholder="nama akaun"></td>
+      <td><input type="text" class="tmpl-input num" id="${idA}" data-card="${cardIdx}" placeholder="RM"></td>
+    </tr>`;
+  }
+  // Baris kosong (padding) supaya baris Jumlah di kedua-dua sisi sejajar sebaris,
+  // walaupun bilangan baris transaksi debit dan kredit tidak sama.
+  const fillerNeeded = acc.showTotal ? Math.max(0, (maxRows||rows) - rows) : 0;
+  for(let f=0; f<fillerNeeded; f++){
+    html += `<tr class="tmpl-ledger-filler">
+      <td><input type="text" class="tmpl-input" disabled style="border-color:transparent;"></td>
+      <td><input type="text" class="tmpl-input" disabled style="border-color:transparent;"></td>
+      <td><input type="text" class="tmpl-input num" disabled style="border-color:transparent;"></td>
+    </tr>`;
+  }
+  if(acc.showTotal){
+    const idT = `t-${cardIdx}-${bIdx}-${ai}-${side}-total`;
+    html += `<tr><td colspan="2" style="text-align:right;font-weight:700;">Jumlah</td>
+      <td><input type="text" class="tmpl-input num" id="${idT}" data-card="${cardIdx}" placeholder="RM" style="font-weight:700;"></td></tr>`;
+  }
+  if(acc.showCarryDown && acc.carrySide === side){
+    const idC = `t-${cardIdx}-${bIdx}-${ai}-${side}-carry`;
+    html += `<tr><td></td><td>Baki b/b</td>
+      <td><input type="text" class="tmpl-input num" id="${idC}" data-card="${cardIdx}" placeholder="RM"></td></tr>`;
+  }
+  if(rows===0 && !acc.showTotal && !(acc.showCarryDown && acc.carrySide===side)){
+    html += `<tr><td colspan="3" style="color:var(--ink-soft);font-style:italic;">—</td></tr>`;
+  }
+  html += `</tbody></table>`;
+  return html;
+}
+
+function renderLedgerBlock(block, cardIdx, bIdx){
+  let html = "";
+  block.accounts.forEach((acc, ai)=>{
+    const maxRows = Math.max(acc.debitRows||0, acc.creditRows||0);
+    html += `<div class="tmpl-ledger">
+      <div class="tmpl-ledger-title">${acc.title}</div>
+      <div class="side debit">${renderLedgerSide('debit', acc, cardIdx, bIdx, ai, maxRows)}</div>
+      <div class="side credit">${renderLedgerSide('credit', acc, cardIdx, bIdx, ai, maxRows)}</div>
+    </div>`;
+  });
+  return html;
+}
+
+function renderTrialBalanceBlock(block, cardIdx, bIdx){
+  let html = `<table class="tmpl-table"><thead><tr>
+    <th>Butiran</th><th style="width:110px;">Debit (RM)</th><th style="width:110px;">Kredit (RM)</th>
+  </tr></thead><tbody>`;
+  block.accounts.forEach((name, ai)=>{
+    const idD = `t-${cardIdx}-${bIdx}-${ai}-d`;
+    const idK = `t-${cardIdx}-${bIdx}-${ai}-k`;
+    html += `<tr><td>${name}</td>
+      <td><input type="text" class="tmpl-input num" id="${idD}" data-card="${cardIdx}" placeholder="RM"></td>
+      <td><input type="text" class="tmpl-input num" id="${idK}" data-card="${cardIdx}" placeholder="RM"></td></tr>`;
+  });
+  const idDT = `t-${cardIdx}-${bIdx}-total-d`;
+  const idKT = `t-${cardIdx}-${bIdx}-total-k`;
+  html += `<tr style="font-weight:700;"><td>JUMLAH</td>
+    <td><input type="text" class="tmpl-input num" id="${idDT}" data-card="${cardIdx}" placeholder="RM"></td>
+    <td><input type="text" class="tmpl-input num" id="${idKT}" data-card="${cardIdx}" placeholder="RM"></td></tr>`;
+  html += `</tbody></table>`;
+  return html;
+}
+
+function renderStatementBlock(block, cardIdx, bIdx){
+  let html = "";
+  if(block.heading) html += `<div class="tmpl-heading">${block.heading}</div>`;
+  html += `<table class="tmpl-table"><thead><tr>
+    <th>Butiran</th><th style="width:85px;">RM</th><th style="width:85px;">RM</th><th style="width:85px;">RM</th>
+  </tr></thead><tbody>`;
+  block.rows.forEach((r, ri)=>{
+    const cls = ['tmpl-statement-row'];
+    if(r.bold) cls.push('bold');
+    if(r.header) cls.push('header');
+    const indentPx = (r.indent||0)*16 + 8;
+    let c1='', c2='', c3='';
+    if(!r.header){
+      if(r.c1){ const id=`t-${cardIdx}-${bIdx}-${ri}-c1`; c1 = `<input type="text" class="tmpl-input num" id="${id}" data-card="${cardIdx}" placeholder="RM">`; }
+      if(r.c2){ const id=`t-${cardIdx}-${bIdx}-${ri}-c2`; c2 = `<input type="text" class="tmpl-input num" id="${id}" data-card="${cardIdx}" placeholder="RM">`; }
+      if(r.c3){ const id=`t-${cardIdx}-${bIdx}-${ri}-c3`; c3 = `<input type="text" class="tmpl-input num" id="${id}" data-card="${cardIdx}" placeholder="RM">`; }
+    }
+    html += `<tr class="${cls.join(' ')}"><td class="label" style="padding-left:${indentPx}px;">${r.label||''}</td><td>${c1}</td><td>${c2}</td><td>${c3}</td></tr>`;
+  });
+  html += `</tbody></table>`;
+  return html;
+}
+
+function renderComparisonBlock(block, cardIdx, bIdx){
+  let html = `<table class="tmpl-table"><thead><tr>
+    <th style="width:110px;">Aspek</th><th>${block.col1||'Lajur 1'}</th><th>${block.col2||'Lajur 2'}</th>
+  </tr></thead><tbody>`;
+  block.rows.forEach((label, ri)=>{
+    const id1 = `t-${cardIdx}-${bIdx}-${ri}-a`;
+    const id2 = `t-${cardIdx}-${bIdx}-${ri}-b`;
+    html += `<tr><td style="font-weight:600;">${label}</td>
+      <td><input type="text" class="tmpl-input" id="${id1}" data-card="${cardIdx}" placeholder="jawapan..."></td>
+      <td><input type="text" class="tmpl-input" id="${id2}" data-card="${cardIdx}" placeholder="jawapan..."></td></tr>`;
+  });
+  html += `</tbody></table>`;
+  return html;
+}
+
+function renderTemplateBlocks(template, cardIdx){
+  let html = `<div class="tmpl-wrap" data-card="${cardIdx}">`;
+  template.blocks.forEach((block, bIdx)=>{
+    switch(block.type){
+      case 'journal': html += renderJournalBlock(block, cardIdx, bIdx); break;
+      case 'ledger': html += renderLedgerBlock(block, cardIdx, bIdx); break;
+      case 'trial_balance': html += renderTrialBalanceBlock(block, cardIdx, bIdx); break;
+      case 'statement': html += renderStatementBlock(block, cardIdx, bIdx); break;
+      case 'comparison': html += renderComparisonBlock(block, cardIdx, bIdx); break;
+      case 'blanks': html += renderBlanksBlock(block, cardIdx, bIdx); break;
+    }
+  });
+  html += `</div>`;
+  return html;
+}
+
+/* ============================================================
    RENDER — BAHAGIAN B (SUBJEKTIF)
    ============================================================ */
-const MIN_ANSWER_LEN = 15; // minimum characters before "Lihat Jawapan Model" is enabled
+const MIN_ANSWER_LEN = 15; // minimum characters before "Lihat Jawapan Model" is enabled (kotak teks bebas)
 
 function renderSubj(){
   const list = document.getElementById('subjList');
@@ -734,18 +1080,25 @@ function renderSubj(){
   subjData.forEach((item, idx)=>{
     const card = document.createElement('div');
     card.className = 's-card';
+    const answerFieldHtml = item.template
+      ? renderTemplateBlocks(item.template, idx)
+      : `<textarea class="s-answerbox" id="input-${idx}" placeholder="Taip jawapan anda di sini dahulu..."></textarea>`;
+    const hintDefault = item.template
+      ? "Isi templat jawapan di atas dahulu untuk membuka jawapan model."
+      : "Tulis jawapan anda dahulu untuk membuka jawapan model.";
     card.innerHTML = `
       <div class="q-meta"><span>${item.topic}</span><span>Soalan ${idx+1} / ${subjData.length} &middot; ${item.marks} markah</span></div>
       <div class="s-body">
         <p class="s-q">${item.q}</p>
-        <textarea class="s-answerbox" id="input-${idx}" placeholder="Taip jawapan anda di sini dahulu..."></textarea>
-        <p class="s-hint" id="hint-${idx}">Tulis jawapan anda dahulu untuk membuka jawapan model.</p>
+        ${answerFieldHtml}
+        <p class="s-hint" id="hint-${idx}">${hintDefault}</p>
         <button class="s-toggle" data-idx="${idx}" disabled>Lihat Jawapan Model</button>
         <div class="s-answer" id="ans-${idx}"><pre>${item.ans}</pre></div>
       </div>`;
     list.appendChild(card);
   });
 
+  // Soalan format teks bebas (tiada templat)
   list.querySelectorAll('.s-answerbox').forEach(box=>{
     box.addEventListener('input', ()=>{
       const idx = box.id.split('-')[1];
@@ -757,6 +1110,25 @@ function renderSubj(){
         ? "Jawapan anda dah cukup panjang — sedia untuk semak."
         : `Tulis jawapan anda dahulu untuk membuka jawapan model. (${box.value.trim().length}/${MIN_ANSWER_LEN})`;
     });
+  });
+
+  // Soalan berformat templat (jurnal / lejar / imbangan duga / penyata / kunci kira-kira / perbandingan)
+  list.querySelectorAll('.tmpl-wrap').forEach(wrap=>{
+    const idx = wrap.dataset.card;
+    const inputs = wrap.querySelectorAll('.tmpl-input[data-card]');
+    const btn = list.querySelector(`.s-toggle[data-idx="${idx}"]`);
+    const hint = document.getElementById('hint-'+idx);
+    const threshold = Math.max(2, Math.ceil(inputs.length * 0.5));
+    function checkFilled(){
+      const filled = Array.from(inputs).filter(i=>i.value.trim().length>0).length;
+      const ready = filled >= threshold;
+      btn.disabled = !ready;
+      hint.textContent = ready
+        ? "Templat anda dah cukup lengkap — sedia untuk semak."
+        : `Isi templat jawapan di atas dahulu untuk membuka jawapan model. (${filled}/${threshold} ruangan diisi)`;
+    }
+    inputs.forEach(inp=> inp.addEventListener('input', checkFilled));
+    checkFilled();
   });
 
   list.querySelectorAll('.s-toggle').forEach(btn=>{
@@ -783,18 +1155,13 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 });
 
 document.getElementById('resetBtn').addEventListener('click', ()=>{
-  if(!confirm('Set semula semua jawapan objektif?')) return;
+  if(!confirm('Set semula semua jawapan objektif dan subjektif?')) return;
   answered = new Set();
   correctSet = new Set();
   window.__lastPicked = {};
   renderMCQ();
   updateScore();
-  document.querySelectorAll('.s-answer').forEach(a=>a.classList.remove('show'));
-  document.querySelectorAll('.s-toggle').forEach(b=>{ b.textContent = "Lihat Jawapan Model"; b.disabled = true; });
-  document.querySelectorAll('.s-answerbox').forEach(box=>{ box.value = ""; });
-  document.querySelectorAll('[id^="hint-"]').forEach(h=>{
-    h.textContent = `Tulis jawapan anda dahulu untuk membuka jawapan model. (0/${MIN_ANSWER_LEN})`;
-  });
+  renderSubj();
 });
 
 /* ============================================================

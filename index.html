@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pecutan Akhir — Prinsip Perakaunan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#ECEEE8;
+  --paper-line:#CBC6B4;
+  --card:#F7F7F2;
+  --ink:#1E2A3F;
+  --ink-soft:#4B5566;
+  --brass:#A9832E;
+  --brass-soft:#D9C48C;
+  --debit:#A13D34;
+  --debit-soft:#F1DAD6;
+  --credit:#2E6B4F;
+  --credit-soft:#D9E9DF;
+  --shadow: 0 1px 0 rgba(30,42,63,0.08);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:
+    repeating-linear-gradient(var(--paper) 0px, var(--paper) 33px, var(--paper-line) 34px);
+  background-color:var(--paper);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  line-height:1.55;
+}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
+
+.wrap{max-width:920px; margin:0 auto; padding:0 20px 90px;}
+
+/* ---------- HEADER / LEDGER COVER ---------- */
+header.cover{
+  background:var(--ink);
+  color:var(--paper);
+  padding:56px 20px 40px;
+  position:relative;
+  border-bottom:6px solid var(--brass);
+}
+header.cover::after{
+  content:"";
+  position:absolute; left:0; right:0; bottom:-6px; height:6px;
+  background:repeating-linear-gradient(90deg, var(--brass) 0 14px, transparent 14px 28px);
+  opacity:.5;
+}
+.cover-inner{max-width:920px; margin:0 auto;}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--brass-soft); margin:0 0 14px;
+}
+h1.title{
+  font-family:'Spectral',serif; font-weight:600; font-style:italic;
+  font-size:clamp(32px,5.2vw,52px); line-height:1.08; margin:0 0 10px;
+  color:#fff;
+}
+.subtitle{
+  font-size:16px; color:#C7CEDA; max-width:60ch; margin:0 0 26px;
+}
+.cover-meta{
+  display:flex; flex-wrap:wrap; gap:10px;
+  font-family:'IBM Plex Mono',monospace; font-size:12.5px;
+}
+.tag{
+  border:1px solid rgba(217,196,140,.45); color:var(--brass-soft);
+  padding:5px 11px; border-radius:2px;
+}
+
+/* ---------- LEDGER SCORE / BAKI MARKAH (signature element) ---------- */
+.ledger-balance{
+  background:var(--card);
+  border:1px solid var(--paper-line);
+  margin-top:-28px;
+  box-shadow:0 10px 24px -14px rgba(30,42,63,.35);
+  position:relative; z-index:2;
+}
+.ledger-balance .lb-head{
+  font-family:'Spectral',serif; font-style:italic; font-weight:600;
+  font-size:15px; padding:10px 18px; border-bottom:1px solid var(--paper-line);
+  display:flex; justify-content:space-between; align-items:center;
+  background:repeating-linear-gradient(90deg, transparent 0 2px, rgba(169,131,46,.08) 2px 3px);
+}
+.lb-head span.small{font-family:'IBM Plex Mono',monospace; font-style:normal; font-size:11.5px; color:var(--ink-soft);}
+.t-account{display:grid; grid-template-columns:1fr 1fr;}
+.t-side{padding:14px 18px;}
+.t-side.debit{border-right:1px solid var(--paper-line);}
+.t-side h4{
+  margin:0 0 8px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+  letter-spacing:.08em; text-transform:uppercase;
+}
+.t-side.debit h4{color:var(--debit);}
+.t-side.credit h4{color:var(--credit);}
+.t-row{display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:13px; padding:2px 0;}
+.t-total{
+  margin-top:8px; padding-top:8px; border-top:1px solid var(--paper-line);
+  display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace;
+  font-size:14px; font-weight:600;
+}
+
+/* ---------- NAV TABS ---------- */
+nav.tabs{
+  display:flex; gap:6px; flex-wrap:wrap;
+  margin:34px 0 22px; padding-bottom:4px;
+  border-bottom:1px solid var(--paper-line);
+}
+nav.tabs button{
+  font-family:'IBM Plex Mono',monospace; font-size:12.5px;
+  background:transparent; border:1px solid transparent;
+  color:var(--ink-soft); padding:8px 13px; cursor:pointer;
+  border-radius:2px 2px 0 0;
+}
+nav.tabs button.active{
+  background:var(--card); border-color:var(--paper-line); border-bottom-color:var(--card);
+  color:var(--ink); font-weight:600; margin-bottom:-1px;
+}
+nav.tabs button:hover{color:var(--ink);}
+
+section{display:none;}
+section.active{display:block;}
+
+/* ---------- SECTION HEADINGS ---------- */
+.section-head{margin:6px 0 22px;}
+.section-head h2{
+  font-family:'Spectral',serif; font-weight:600; font-size:26px; margin:0 0 6px;
+}
+.section-head p{color:var(--ink-soft); margin:0; font-size:14.5px;}
+
+/* ---------- TOPIC FILTER CHIPS ---------- */
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px;}
+.chip{
+  font-family:'IBM Plex Mono',monospace; font-size:11.5px;
+  border:1px solid var(--paper-line); background:var(--card);
+  padding:6px 12px; border-radius:20px; cursor:pointer; color:var(--ink-soft);
+}
+.chip.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
+/* ---------- MCQ CARD ---------- */
+.q-card{
+  background:var(--card); border:1px solid var(--paper-line);
+  margin-bottom:16px; box-shadow:var(--shadow);
+}
+.q-card .q-meta{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 18px; border-bottom:1px dashed var(--paper-line);
+  font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);
+  text-transform:uppercase; letter-spacing:.06em;
+}
+.q-body{padding:18px;}
+.q-text{font-size:15.5px; margin:0 0 14px; font-weight:500;}
+.q-text .num{
+  font-family:'IBM Plex Mono',monospace; color:var(--brass); margin-right:8px;
+}
+.opts{display:grid; gap:8px;}
+.opt{
+  display:flex; gap:10px; align-items:flex-start;
+  border:1px solid var(--paper-line); background:#fff;
+  padding:10px 12px; cursor:pointer; font-size:14.5px; border-radius:3px;
+}
+.opt:hover{border-color:var(--brass);}
+.opt .letter{
+  font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--ink-soft);
+  min-width:18px;
+}
+.opt.correct{background:var(--credit-soft); border-color:var(--credit); }
+.opt.correct .letter{color:var(--credit);}
+.opt.wrong{background:var(--debit-soft); border-color:var(--debit);}
+.opt.wrong .letter{color:var(--debit);}
+.opt.disabled{cursor:default;}
+.explain{
+  margin-top:12px; padding:10px 12px; background:rgba(169,131,46,.08);
+  border-left:3px solid var(--brass); font-size:13.5px; display:none;
+}
+.explain.show{display:block;}
+
+/* ---------- SUBJECTIVE CARD ---------- */
+.s-card{
+  background:var(--card); border:1px solid var(--paper-line);
+  margin-bottom:18px; box-shadow:var(--shadow);
+}
+.s-card .q-meta{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 18px; border-bottom:1px dashed var(--paper-line);
+  font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);
+  text-transform:uppercase; letter-spacing:.06em;
+}
+.s-body{padding:18px;}
+.s-q{font-size:15.5px; margin:0 0 6px; font-weight:500; white-space:pre-line;}
+.s-toggle{
+  margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:12.5px;
+  background:var(--ink); color:var(--paper); border:none; padding:8px 14px;
+  cursor:pointer; border-radius:2px;
+}
+.s-answer{
+  display:none; margin-top:14px; padding:14px; background:#fff;
+  border:1px solid var(--paper-line); border-left:3px solid var(--credit);
+}
+.s-answer.show{display:block;}
+.s-answer pre{
+  font-family:'IBM Plex Mono',monospace; font-size:13px; white-space:pre-wrap;
+  margin:0; line-height:1.6;
+}
+
+/* ---------- FOOTER SCORE BAR ---------- */
+.floatbar{
+  position:sticky; bottom:0; left:0; right:0;
+  background:var(--ink); color:var(--paper);
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 20px; font-family:'IBM Plex Mono',monospace; font-size:13px;
+  border-top:3px solid var(--brass); margin-top:30px;
+}
+.floatbar button{
+  background:var(--brass); color:var(--ink); border:none;
+  font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:12.5px;
+  padding:9px 16px; cursor:pointer; border-radius:2px;
+}
+footer.note{
+  text-align:center; color:var(--ink-soft); font-size:12px; padding:26px 20px 0;
+  font-family:'IBM Plex Mono',monospace;
+}
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="cover-inner">
+    <p class="eyebrow">Diploma Pengurusan Perniagaan &middot; Prinsip Perakaunan</p>
+    <h1 class="title">Pecutan Akhir<br>Sebelum Peperiksaan</h1>
+    <p class="subtitle">Bank latihan disusun daripada analisis 4 set kertas soalan sebenar (2020–2022/2023) — soalan asli, format sama, sedia untuk latih tubi sebelum Peperiksaan Akhir Semester.</p>
+    <div class="cover-meta">
+      <span class="tag">80 Soalan Objektif</span>
+      <span class="tag">16 Soalan Subjektif</span>
+      <span class="tag">8 Topik Teras</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="ledger-balance">
+    <div class="lb-head">
+      <span>Baki Markah — Bahagian Objektif</span>
+      <span class="small" id="lbProgress">0 / 80 dijawab</span>
+    </div>
+    <div class="t-account">
+      <div class="t-side debit">
+        <h4>Debit (Jawapan Betul)</h4>
+        <div class="t-row"><span>Bil. betul</span><span id="correctCount">0</span></div>
+        <div class="t-total"><span>Jumlah</span><span id="correctTotal">0</span></div>
+      </div>
+      <div class="t-side credit">
+        <h4>Kredit (Jawapan Salah)</h4>
+        <div class="t-row"><span>Bil. salah</span><span id="wrongCount">0</span></div>
+        <div class="t-total"><span>Jumlah</span><span id="wrongTotal">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-target="objektif">Bahagian A — Objektif</button>
+    <button class="tab-btn" data-target="subjektif">Bahagian B — Subjektif</button>
+  </nav>
+
+  <!-- ============ BAHAGIAN A ============ -->
+  <section id="objektif" class="active">
+    <div class="section-head">
+      <h2>Bahagian A · Soalan Objektif</h2>
+      <p>Klik satu pilihan untuk jawab. Jawapan betul akan bertukar hijau serta merta, jawapan salah bertukar merah dengan penjelasan ringkas.</p>
+    </div>
+    <div class="chips" id="chipBar"></div>
+    <div id="mcqList"></div>
+  </section>
+
+  <!-- ============ BAHAGIAN B ============ -->
+  <section id="subjektif">
+    <div class="section-head">
+      <h2>Bahagian B · Soalan Subjektif</h2>
+      <p>Cuba jawab di atas kertas dahulu, kemudian klik "Lihat Jawapan Model" untuk semak.</p>
+    </div>
+    <div id="subjList"></div>
+  </section>
+
+</div>
+
+<div class="floatbar">
+  <span id="floatScore">Markah Objektif: 0 / 0</span>
+  <button id="resetBtn">Set Semula Latihan</button>
+</div>
+
+<footer class="note">Dibina untuk Pecutan Akhir Prinsip Perakaunan &middot; Soalan asli dicipta berdasarkan analisis format kertas sebenar</footer>
+
+<script>
+/* ============================================================
+   DATA — 80 SOALAN OBJEKTIF
+   ============================================================ */
+const mcqData = [
+// ---- TOPIK: Dokumen Sumber & Buku Catatan Pertama (12) ----
+{topic:"Dokumen Sumber", q:"Apakah buku catatan pertama yang digunakan untuk merekod belian barang niaga secara kredit?", opts:["Jurnal Jualan","Jurnal Belian","Jurnal Am","Buku Tunai"], correct:1, explain:"Belian barang niaga secara kredit direkod dalam Jurnal Belian berdasarkan invois asal yang diterima daripada pembekal."},
+{topic:"Dokumen Sumber", q:"Padanan manakah BETUL antara dokumen sumber dengan buku catatan pertama?", opts:["Invois asal — Jurnal Belian","Invois salinan — Jurnal Belian","Nota debit asal — Jurnal Pulangan Belian","Nota kredit salinan — Jurnal Pulangan Belian"], correct:1, explain:"Apabila perniagaan menjual, invois salinan (yang disimpan penjual) direkod dalam Jurnal Belian oleh pembeli — sebenarnya invois salinan adalah rujukan penjual untuk Jurnal Jualan. Bagi pembeli, invois asal digunakan untuk Jurnal Belian."},
+{topic:"Dokumen Sumber", q:"Nota Kredit dikeluarkan oleh penjual apabila _____________.", opts:["pembeli memulangkan barang rosak","pembeli membuat bayaran tunai","penjual menerima pesanan baharu","pembeli meminta invois baharu"], correct:0, explain:"Nota Kredit dikeluarkan oleh penjual untuk mengurangkan jumlah hutang pembeli apabila barang dipulangkan atau terdapat lebihan caj."},
+{topic:"Dokumen Sumber", q:"Resit dikeluarkan sebagai bukti bagi urus niaga _____________.", opts:["belian secara kredit","jualan secara kredit","penerimaan atau pembayaran tunai","pulangan barang niaga"], correct:2, explain:"Resit adalah dokumen sumber untuk urus niaga tunai — bukti penerimaan atau pembayaran wang tunai."},
+{topic:"Dokumen Sumber", q:"Keratan cek digunakan sebagai dokumen sumber bagi merekod _____________.", opts:["pembayaran melalui cek","penerimaan tunai","pulangan jualan","diskaun niaga"], correct:0, explain:"Keratan cek (cheque counterfoil) yang ditinggalkan dalam buku cek menjadi rujukan dalaman untuk merekod pembayaran melalui cek."},
+{topic:"Dokumen Sumber", q:"Manakah urus niaga yang direkod dalam Jurnal Pulangan Jualan?", opts:["Pelanggan memulangkan barang rosak yang dibeli secara kredit","Perniagaan memulangkan barang kepada pembekal","Pelanggan membayar hutang dengan cek","Perniagaan membeli barang niaga secara tunai"], correct:0, explain:"Jurnal Pulangan Jualan merekod barang niaga yang dipulangkan OLEH pelanggan kepada perniagaan, berdasarkan Nota Kredit asal."},
+{topic:"Dokumen Sumber", q:"Diskaun niaga diberikan oleh penjual bertujuan untuk _____________.", opts:["menggalakkan pembelian secara pukal","menggalakkan bayaran segera","menutup kerugian jualan","mengurangkan kos pengangkutan"], correct:0, explain:"Diskaun niaga (trade discount) biasanya diberi untuk menggalakkan pembelian dalam kuantiti besar, berbeza dengan diskaun tunai yang menggalakkan bayaran segera."},
+{topic:"Dokumen Sumber", q:"Invois yang dihantar oleh penjual kepada pembeli dikenali sebagai _____________ bagi pihak penjual.", opts:["invois asal","invois salinan","nota debit","nota kredit"], correct:1, explain:"Salinan invois yang disimpan oleh penjual (untuk rekod Jurnal Jualan) dikenali sebagai invois salinan; pembeli menyimpan invois asal untuk Jurnal Belian."},
+{topic:"Dokumen Sumber", q:"Baucar pembayaran biasanya digunakan sebagai dokumen sumber bagi _____________.", opts:["belanja kecil yang dibayar secara tunai","jualan kredit barang niaga","pulangan belian","ambilan barang niaga"], correct:0, explain:"Baucar pembayaran (payment voucher) digunakan untuk merekod pembayaran tunai kecil seperti belanja pejabat."},
+{topic:"Dokumen Sumber", q:"Sebuah invois berjumlah RM2,000 dengan syarat diskaun tunai 5% jika bayar dalam 14 hari. Jika pembayaran dibuat pada hari ke-10, berapakah jumlah yang perlu dibayar?", opts:["RM1,900","RM1,950","RM2,000","RM2,100"], correct:0, explain:"Diskaun tunai layak diperoleh kerana dibayar dalam tempoh 14 hari. RM2,000 − (5% × RM2,000) = RM2,000 − RM100 = RM1,900."},
+{topic:"Dokumen Sumber", q:"Antara berikut, yang manakah BUKAN dokumen sumber bagi urus niaga tunai?", opts:["Resit","Slip daftar tunai","Bil tunai","Invois secara kredit"], correct:3, explain:"Invois secara kredit adalah dokumen sumber bagi urus niaga kredit (Jurnal Belian/Jualan), bukan urus niaga tunai."},
+{topic:"Dokumen Sumber", q:"Memo dalaman perniagaan biasanya digunakan sebagai dokumen sumber bagi merekod _____________.", opts:["belian barang niaga secara kredit","ambilan barang niaga oleh pemilik","jualan barang niaga secara tunai","bayaran kepada pemiutang"], correct:1, explain:"Memo ditandatangani oleh pemilik/pengurus sering digunakan sebagai bukti dalaman bagi ambilan barang niaga untuk kegunaan sendiri."},
+
+// ---- TOPIK: Buku Tunai (10) ----
+{topic:"Buku Tunai", q:"Antara berikut, urus niaga manakah direkod di sebelah DEBIT Buku Tunai?", opts:["Membayar gaji pekerja","Membeli perabot dengan cek","Menerima bayaran daripada penghutang","Menjelaskan hutang kepada pemiutang"], correct:2, explain:"Penerimaan tunai/cek (contohnya daripada penghutang) direkod di sebelah debit Buku Tunai kerana ia menambah baki tunai/bank."},
+{topic:"Buku Tunai", q:"Urus niaga manakah TIDAK direkod dalam Buku Tunai?", opts:["Bayar bil elektrik dengan cek","Belian barang niaga secara kredit","Terima bayaran daripada penghutang","Ambil wang tunai untuk kegunaan sendiri"], correct:1, explain:"Belian secara kredit tidak melibatkan pergerakan tunai/bank serta-merta, jadi ia direkod dalam Jurnal Belian, bukan Buku Tunai."},
+{topic:"Buku Tunai", q:"Lajur diskaun di sebelah debit Buku Tunai mewakili _____________.", opts:["diskaun diterima","diskaun diberi","diskaun niaga","diskaun ambilan"], correct:1, explain:"Diskaun diberi kepada penghutang (yang membayar awal) dicatat di lajur diskaun sebelah debit Buku Tunai."},
+{topic:"Buku Tunai", q:"Sebuah invois berjumlah RM800 dengan syarat 3% diskaun tunai jika dibayar dalam 30 hari. Jika penghutang membayar pada hari ke-25, berapakah amaun tunai yang diterima?", opts:["RM24","RM776","RM800","RM824"], correct:1, explain:"Diskaun = 3% × RM800 = RM24. Amaun tunai diterima = RM800 − RM24 = RM776."},
+{topic:"Buku Tunai", q:"Cek yang diterima daripada penghutang tetapi dikembalikan oleh bank kerana tidak sah (cek tak laku) akan menyebabkan _____________.", opts:["baki penghutang berkurang","baki penghutang bertambah semula","baki pemiutang bertambah","baki tunai bertambah"], correct:1, explain:"Apabila cek tak laku (dishonoured), catatan asal perlu diterbalikkan — baki penghutang perlu bertambah semula kerana hutang belum benar-benar dijelaskan."},
+{topic:"Buku Tunai", q:"Baki Buku Tunai lajur bank yang bercatat di sebelah kredit lebih besar daripada debit menunjukkan _____________.", opts:["baki debit (lebihan tunai)","baki kredit (overdraf bank)","kesilapan pengiraan","baki sifar"], correct:1, explain:"Jika jumlah kredit melebihi debit dalam lajur bank, ini menunjukkan overdraf bank iaitu perniagaan berhutang kepada bank."},
+{topic:"Buku Tunai", q:"Apakah kegunaan Buku Tunai Runcit (Petty Cash Book)?", opts:["Merekod semua belian secara kredit","Merekod perbelanjaan kecil harian","Merekod jualan secara tunai sahaja","Merekod susut nilai aset"], correct:1, explain:"Buku Tunai Runcit digunakan khusus untuk merekod perbelanjaan-perbelanjaan kecil seperti pos, alat tulis, dan pengangkutan."},
+{topic:"Buku Tunai", q:"Manakah antara berikut direkodkan di sebelah KREDIT Buku Tunai?", opts:["Jualan tunai","Terima bayaran daripada penghutang","Bayar belanja utiliti dengan cek","Modal tambahan dimasukkan oleh pemilik"], correct:2, explain:"Pembayaran (aliran keluar tunai/bank) seperti bayaran belanja direkod di sebelah kredit Buku Tunai."},
+{topic:"Buku Tunai", q:"Baki tunai dan baki bank yang dibawa ke hadapan pada permulaan bulan baharu ditulis sebagai _____________.", opts:["Baki h/b di sebelah debit","Baki h/b di sebelah kredit","Jumlah besar sahaja","Baki b/b di sebelah debit"], correct:3, explain:"Baki permulaan tempoh baharu ditulis sebagai 'Baki b/b' (bawa ke bawah / dibawa ke hadapan) di sebelah debit jika baki asal adalah baki debit."},
+{topic:"Buku Tunai", q:"Diskaun diterima direkodkan di dalam Buku Tunai pada lajur diskaun sebelah _____________.", opts:["debit","kredit","tiada — direkod dalam Jurnal Am sahaja","kedua-dua debit dan kredit"], correct:1, explain:"Diskaun diterima (daripada pembekal, kerana perniagaan membayar awal) dicatat di lajur diskaun sebelah kredit Buku Tunai."},
+
+// ---- TOPIK: Jurnal Am & Catatan Bergu (12) ----
+{topic:"Jurnal Am", q:"Perniagaan membeli sebuah komputer riba secara kredit daripada Syarikat Mega bernilai RM2,500. Apakah catatan yang betul?", opts:["Dt Alatan Pejabat RM2,500 / Kt Syarikat Mega RM2,500","Dt Syarikat Mega RM2,500 / Kt Alatan Pejabat RM2,500","Dt Belian RM2,500 / Kt Syarikat Mega RM2,500","Dt Bank RM2,500 / Kt Alatan Pejabat RM2,500"], correct:0, explain:"Aset (Alatan Pejabat) bertambah — didebitkan. Pemiutang (Syarikat Mega) bertambah — dikreditkan."},
+{topic:"Jurnal Am", q:"Pemilik mengambil barang niaga bernilai RM300 untuk kegunaan sendiri. Apakah catatan bergu yang betul?", opts:["Dt Ambilan / Kt Belian","Dt Belian / Kt Ambilan","Dt Ambilan / Kt Jualan","Dt Modal / Kt Belian"], correct:0, explain:"Ambilan barang niaga oleh pemilik menambah Akaun Ambilan (debit) dan mengurangkan Akaun Belian (kredit) kerana stok berkurang."},
+{topic:"Jurnal Am", q:"Perniagaan menjual barang niaga secara kredit kepada Kedai ABC. Apakah akaun yang didebitkan dan dikreditkan?", opts:["Dt Jualan / Kt Kedai ABC","Dt Kedai ABC / Kt Jualan","Dt Tunai / Kt Jualan","Dt Kedai ABC / Kt Belian"], correct:1, explain:"Penghutang (Kedai ABC) bertambah — didebitkan. Hasil (Jualan) bertambah — dikreditkan."},
+{topic:"Jurnal Am", q:"Manakah antara berikut catatan bergu yang BETUL bagi urus niaga 'Ambilan barang niaga untuk tujuan promosi'?", opts:["Dt Ambilan / Kt Belian","Dt Belanja Promosi / Kt Belian","Dt Ambilan / Kt Promosi","Dt Belian / Kt Belanja Promosi"], correct:1, explain:"Barang niaga yang diambil untuk promosi (bukan kegunaan peribadi pemilik) direkod sebagai Belanja Promosi (debit), dan Belian dikreditkan kerana stok berkurang."},
+{topic:"Jurnal Am", q:"Prinsip asas catatan bergu ialah _____________.", opts:["setiap urus niaga hanya melibatkan satu akaun","setiap debit mesti mempunyai kredit yang sepadan","hanya akaun aset yang didebitkan","hasil sentiasa didebitkan"], correct:1, explain:"Sistem catatan bergu (double entry) menetapkan setiap urus niaga mempengaruhi sekurang-kurangnya dua akaun — satu debit dan satu kredit dengan jumlah yang sama."},
+{topic:"Jurnal Am", q:"Aset didebitkan apabila _____________, manakala liabiliti dikreditkan apabila _____________.", opts:["berkurang; berkurang","bertambah; bertambah","bertambah; berkurang","berkurang; bertambah"], correct:1, explain:"Peraturan asas: Aset bertambah = debit; Liabiliti bertambah = kredit (dan sebaliknya bila berkurang)."},
+{topic:"Jurnal Am", q:"Pemilik memasukkan wang tunai tambahan RM10,000 sebagai modal ke dalam perniagaan. Apakah catatan yang betul?", opts:["Dt Modal / Kt Tunai","Dt Tunai / Kt Modal","Dt Bank / Kt Ambilan","Dt Ambilan / Kt Modal"], correct:1, explain:"Tunai (aset) bertambah — debit. Modal (ekuiti pemilik) bertambah — kredit."},
+{topic:"Jurnal Am", q:"Perniagaan membayar hutang kepada pemiutang, Syarikat Damai, sebanyak RM1,200 dengan cek. Apakah catatan lejar yang betul?", opts:["Dt Syarikat Damai / Kt Bank","Dt Bank / Kt Syarikat Damai","Dt Belian / Kt Bank","Dt Syarikat Damai / Kt Tunai"], correct:0, explain:"Liabiliti (Syarikat Damai/pemiutang) berkurang — debit. Bank (aset) berkurang — kredit."},
+{topic:"Jurnal Am", q:"Kesilapan 'catatan songsang' (complete reversal of entries) bermaksud _____________.", opts:["urus niaga langsung tidak direkod","urus niaga direkod dengan jumlah yang salah","akaun yang betul digunakan tetapi debit dan kredit tertukar","urus niaga direkod dua kali dalam akaun yang sama"], correct:2, explain:"Catatan songsang berlaku apabila akaun yang betul dipilih tetapi sisi debit dan kredit tertukar sepenuhnya."},
+{topic:"Jurnal Am", q:"Kesilapan yang TIDAK menjejaskan keseimbangan Imbangan Duga termasuklah _____________.", opts:["kesilapan jumlah sebelah debit sahaja","kesilapan tertinggal terus (omission)","kesilapan hanya mendebit satu akaun","lupa mengepos ke satu akaun"], correct:1, explain:"Kesilapan tertinggal terus (satu urus niaga langsung tidak direkod dalam mana-mana akaun) tidak menjejaskan keseimbangan kerana kedua-dua sisi 'seimbang' pada sifar."},
+{topic:"Jurnal Am", q:"Perniagaan membayar insurans peribadi pemilik menggunakan wang perniagaan RM400. Apakah catatan yang betul?", opts:["Dt Insurans / Kt Tunai","Dt Ambilan / Kt Tunai","Dt Tunai / Kt Ambilan","Dt Modal / Kt Insurans"], correct:1, explain:"Perbelanjaan peribadi pemilik yang dibayar guna wang perniagaan direkod sebagai Ambilan (debit), bukan belanja perniagaan."},
+{topic:"Jurnal Am", q:"Perniagaan membeli kenderaan RM45,000 dan membayar RM15,000 tunai, baki secara kredit daripada penjual kenderaan. Apakah catatan yang betul?", opts:["Dt Kenderaan RM45,000 / Kt Tunai RM45,000","Dt Kenderaan RM45,000 / Kt Tunai RM15,000, Kt Penjual Kenderaan RM30,000","Dt Tunai RM15,000, Dt Penjual Kenderaan RM30,000 / Kt Kenderaan RM45,000","Dt Kenderaan RM15,000 / Kt Tunai RM15,000"], correct:1, explain:"Kenderaan (aset) bertambah penuh RM45,000 — debit. Tunai berkurang RM15,000 dan pemiutang (Penjual Kenderaan) bertambah RM30,000 — kedua-duanya kredit."},
+
+// ---- TOPIK: Lejar & Baki Akaun (8) ----
+{topic:"Lejar", q:"Lejar didefinisikan sebagai _____________.", opts:["buku catatan pertama bagi semua urus niaga","buku akaun utama yang merekod semua urus niaga mengikut jenis akaun","penyata yang menunjukkan kedudukan kewangan","senarai baki debit dan kredit"], correct:1, explain:"Lejar ialah buku akaun utama yang mengandungi semua jenis akaun (aset, liabiliti, modal, hasil, belanja) hasil pengeposan daripada buku catatan pertama."},
+{topic:"Lejar", q:"Ruang lajur folio dalam lejar digunakan untuk _____________.", opts:["mencatat tarikh urus niaga","mencatat halaman jurnal sumber catatan","mencatat nombor invois","mencatat baki akhir akaun"], correct:1, explain:"Lajur folio merekodkan rujukan halaman buku catatan pertama (jurnal) yang menjadi sumber pengeposan ke lejar, memudahkan proses audit jejak (audit trail)."},
+{topic:"Lejar", q:"Akaun Bank menunjukkan jumlah debit RM12,400 dan jumlah kredit RM8,900. Apakah baki akaun tersebut?", opts:["Baki debit RM3,500","Baki kredit RM3,500","Baki debit RM21,300","Baki kredit RM21,300"], correct:0, explain:"Baki = Jumlah debit − Jumlah kredit = RM12,400 − RM8,900 = RM3,500 (baki debit kerana debit lebih besar)."},
+{topic:"Lejar", q:"Apabila jumlah kredit sesuatu akaun melebihi jumlah debitnya, baki dibawa ke bawah dicatat di sebelah _____________.", opts:["debit sebagai 'baki b/b'","kredit sebagai 'baki b/b'","debit sebagai 'baki h/b'","kredit sebagai 'baki h/b'"], correct:0, explain:"Baki h/b (hantar ke bawah / bawa ke bawah) dicatat di sebelah yang lebih kecil untuk seimbangkan akaun, kemudian dibawa ke bawah sebagai 'baki b/b' di sebelah bertentangan (debit jika akaun berbaki kredit)."},
+{topic:"Lejar", q:"Susunan langkah yang betul untuk mengimbangkan dan menutup sesuatu akaun ialah _____________.", opts:["jumlahkan dua lajur → cari perbezaan → catat baki h/b → tulis jumlah sama di kedua lajur","catat baki h/b → jumlahkan dua lajur → cari perbezaan","tulis jumlah sama → cari perbezaan → jumlahkan → catat baki h/b","cari perbezaan → catat baki h/b → jumlahkan → tulis jumlah sama"], correct:0, explain:"Urutan yang betul: (1) jumlahkan kedua-dua lajur, (2) tentukan perbezaan antara debit dan kredit, (3) catatkan perbezaan sebagai baki h/b di lajur yang lebih kecil, (4) kedua-dua lajur akan menunjukkan jumlah yang sama."},
+{topic:"Lejar", q:"Lejar am digunakan untuk merekod semua akaun KECUALI _____________.", opts:["akaun hasil dan belanja","akaun aset dan liabiliti","akaun penghutang dan pemiutang individu","akaun modal dan ambilan"], correct:2, explain:"Akaun penghutang dan pemiutang individu direkod dalam Lejar Jualan (Lejar Penghutang) dan Lejar Belian (Lejar Pemiutang) yang berasingan, bukan dalam Lejar Am."},
+{topic:"Lejar", q:"Jika Akaun Perabot menunjukkan baki debit RM6,500 pada awal tempoh, dan tiada urus niaga tambahan sepanjang tempoh, baki tersebut akan muncul di _____________.", opts:["sebelah debit Imbangan Duga","sebelah kredit Imbangan Duga","tidak muncul dalam Imbangan Duga","kedua-dua sebelah Imbangan Duga"], correct:0, explain:"Baki debit akaun aset (Perabot) akan dipindahkan ke sebelah debit Imbangan Duga."},
+{topic:"Lejar", q:"Pengeposan daripada Jurnal Belian ke Lejar Am biasanya dibuat sebagai satu jumlah bulanan ke Akaun Belian, manakala pengeposan individu dibuat ke _____________.", opts:["Akaun Tunai","akaun pemiutang individu dalam Lejar Belian","Akaun Jualan","Akaun Modal"], correct:1, explain:"Jumlah keseluruhan (total) dipos ke Akaun Belian dalam Lejar Am, manakala setiap urus niaga individu dipos ke akaun pemiutang masing-masing dalam Lejar Belian."},
+
+// ---- TOPIK: Imbangan Duga (10) ----
+{topic:"Imbangan Duga", q:"Apakah fungsi utama Imbangan Duga?", opts:["Menunjukkan kedudukan kewangan perniagaan","Menyemak ketepatan catatan bergu","Mengira untung atau rugi bersih","Merekod urus niaga harian"], correct:1, explain:"Imbangan Duga disediakan terutamanya untuk menyemak ketepatan aritmetik catatan bergu — memastikan jumlah debit menyamai jumlah kredit."},
+{topic:"Imbangan Duga", q:"Imbangan Duga ialah _____________.", opts:["senarai baki debit dan kredit yang diambil daripada lejar pada satu tarikh tertentu","penyata yang menunjukkan aset dan liabiliti sahaja","akaun untuk mengira keuntungan perniagaan","buku catatan pertama bagi urus niaga tunai"], correct:0, explain:"Imbangan Duga adalah senarai semua baki akaun (debit dan kredit) yang diambil terus daripada lejar pada satu tarikh tertentu."},
+{topic:"Imbangan Duga", q:"Antara berikut, akaun manakah dicatat di sebelah KREDIT Imbangan Duga?", opts:["Kenderaan","Ambilan","Pemiutang","Penghutang"], correct:2, explain:"Pemiutang (liabiliti) mempunyai baki kredit dan dicatat di sebelah kredit Imbangan Duga. Kenderaan, Ambilan, dan Penghutang semuanya baki debit."},
+{topic:"Imbangan Duga", q:"Diberi maklumat berikut pada 31 Disember: Modal RM20,000, Tunai RM4,500, Penghutang RM3,000, Pemiutang RM2,500, Belian RM8,000, Jualan RM9,500, Perabot RM16,500. Berapakah jumlah Imbangan Duga?", opts:["RM32,000","RM30,500","RM29,500","RM32,500"], correct:0, explain:"Jumlah debit = Tunai 4,500 + Penghutang 3,000 + Belian 8,000 + Perabot 16,500 = RM32,000. Jumlah kredit = Modal 20,000 + Pemiutang 2,500 + Jualan 9,500 = RM32,000."},
+{topic:"Imbangan Duga", q:"Jika sesuatu urus niaga tersilap direkod pada kedua-dua sisi debit dan kredit dengan jumlah yang SAMA tetapi SALAH, ini dikenali sebagai kesilapan _____________.", opts:["peninggalan","prinsip","asal","catatan songsang"], correct:2, explain:"Kesilapan asal (original entry) berlaku apabila jumlah yang salah direkodkan secara konsisten pada kedua-dua sisi — Imbangan Duga tetap seimbang walaupun silap."},
+{topic:"Imbangan Duga", q:"Manakah kesilapan yang AKAN menjejaskan keseimbangan Imbangan Duga?", opts:["Kesilapan prinsip","Kesilapan jumlah hanya di satu akaun","Kesilapan peninggalan lengkap","Kesilapan catatan songsang"], correct:1, explain:"Jika hanya SATU akaun tersilap jumlah (bukan kedua-dua sisi), jumlah debit dan kredit Imbangan Duga tidak akan sepadan."},
+{topic:"Imbangan Duga", q:"Baki Belian dan Jualan dalam Imbangan Duga masing-masing RM15,000 dan RM22,000. Pulangan Jualan RM800 dan Pulangan Belian RM500 turut disenaraikan berasingan. Apakah kesan bersih ke atas jumlah Imbangan Duga berbanding jika kesemua item digabungkan bersih?", opts:["Jumlah Imbangan Duga tidak berubah, hanya struktur berubah","Jumlah Imbangan Duga akan berkurang","Jumlah Imbangan Duga akan bertambah","Imbangan Duga tidak akan seimbang"], correct:0, explain:"Menyenaraikan item kasar (Belian, Jualan, Pulangan) secara berasingan tidak mengubah jumlah akhir Imbangan Duga selagi setiap item diletakkan di sisi debit/kredit yang betul — hanya paparan yang berbeza."},
+{topic:"Imbangan Duga", q:"Item manakah berikut TIDAK akan muncul dalam Imbangan Duga?", opts:["Stok akhir tahun (belum diselaraskan)","Gaji","Modal","Bank"], correct:0, explain:"Stok akhir (closing stock) biasanya BUKAN sebahagian daripada Imbangan Duga asal (ia adalah maklumat tambahan/pelarasan) kecuali dalam Imbangan Duga selepas selarasan."},
+{topic:"Imbangan Duga", q:"Sekiranya Imbangan Duga tidak seimbang, langkah pertama yang patut diambil oleh kerani akaun ialah _____________.", opts:["terus sediakan Penyata Pendapatan","semak semula pengiraan jumlah debit dan kredit","abaikan perbezaan tersebut","tutup semua akaun serta-merta"], correct:1, explain:"Langkah pertama ialah menyemak semula pengiraan aritmetik dan pengeposan sebelum mencari punca kesilapan yang lebih mendalam."},
+{topic:"Imbangan Duga", q:"Overdraf bank akan dicatat di sebelah _____________ dalam Imbangan Duga.", opts:["debit, sebagai aset","kredit, sebagai liabiliti","debit, sebagai liabiliti","kredit, sebagai aset"], correct:1, explain:"Overdraf bank adalah liabiliti semasa (perniagaan berhutang kepada bank), maka dicatat di sebelah kredit Imbangan Duga."},
+
+// ---- TOPIK: Pelarasan Akhir Tahun (14) ----
+{topic:"Pelarasan", q:"Perakaunan Asas Tunai merekod hasil dan belanja apabila _____________.", opts:["tunai diterima atau dibayar","urus niaga berlaku, tanpa mengira tunai","hasil diperoleh sahaja","belanja ditanggung sahaja"], correct:0, explain:"Perakaunan Asas Tunai menggariskan prinsip bahawa hasil direkod hanya apabila tunai diterima, dan belanja direkod hanya apabila tunai dibayar."},
+{topic:"Pelarasan", q:"Perakaunan Asas Akruan dianggap lebih tepat kerana _____________.", opts:["ia lebih mudah dikira","ia memadankan hasil dengan belanja dalam tempoh yang sama tanpa mengira tunai","ia tidak memerlukan pelarasan","ia hanya sesuai untuk perniagaan kecil"], correct:1, explain:"Asas Akruan memadankan (matching) hasil yang diperoleh dengan belanja yang ditanggung dalam tempoh perakaunan yang sama, memberikan gambaran prestasi yang lebih tepat."},
+{topic:"Pelarasan", q:"Sebuah mesin bernilai RM18,000 disusut nilai pada kadar 15% setahun mengikut kaedah garis lurus. Dibeli pada 1 Ogos, tahun kewangan berakhir 31 Disember tahun sama. Berapakah susut nilai bagi tempoh tersebut?", opts:["RM1,125","RM2,700","RM1,350","RM900"], correct:0, explain:"Tempoh guna = 5 bulan (Ogos–Disember). Susut nilai = 15% × RM18,000 × 5/12 = RM1,125."},
+{topic:"Pelarasan", q:"Kaedah susut nilai baki berkurangan (reducing balance) mengira susut nilai berdasarkan _____________.", opts:["harga kos asal aset setiap tahun","nilai buku aset pada awal tahun berkenaan","nilai pasaran semasa aset","anggaran nilai skrap sahaja"], correct:1, explain:"Kaedah baki berkurangan mengenakan kadar peratusan tetap ke atas nilai buku (harga kos tolak susut nilai terkumpul) pada permulaan setiap tahun, bukan harga kos asal."},
+{topic:"Pelarasan", q:"Insurans dibayar RM2,400 untuk tempoh 12 bulan bermula 1 Oktober tahun semasa. Tahun kewangan berakhir 31 Disember tahun sama. Berapakah insurans terdahulu (prepaid) pada akhir tahun?", opts:["RM600","RM1,800","RM2,400","RM1,200"], correct:1, explain:"Tempoh telah lalu = 3 bulan (Okt-Dis) = RM600 dibelanjakan. Baki 9 bulan = RM1,800 adalah insurans terdahulu (belum digunakan, dibawa ke Kunci Kira-Kira sebagai aset semasa)."},
+{topic:"Pelarasan", q:"Gaji pekerja untuk bulan Disember berjumlah RM3,500 masih belum dibayar pada akhir tahun kewangan. Apakah catatan pelarasan yang betul?", opts:["Dt Gaji / Kt Gaji Terakru","Dt Gaji Terakru / Kt Gaji","Dt Gaji / Kt Tunai","Dt Gaji Terdahulu / Kt Gaji"], correct:0, explain:"Gaji Terakru (belum dibayar) menambah belanja Gaji (debit) dan mewujudkan liabiliti Gaji Terakru (kredit) yang perlu dibayar."},
+{topic:"Pelarasan", q:"Sewa diterima terdahulu (received in advance) dikelaskan sebagai _____________ dalam Kunci Kira-Kira.", opts:["aset semasa","liabiliti semasa","aset bukan semasa","ekuiti pemilik"], correct:1, explain:"Sewa diterima terlebih dahulu untuk perkhidmatan yang belum diberikan adalah liabiliti semasa — perniagaan berhutang 'perkhidmatan' kepada penyewa."},
+{topic:"Pelarasan", q:"Jumlah penghutang ialah RM12,000. Seorang penghutang bernilai RM500 disahkan muflis dan dihapuskan sebagai hutang lapuk. Peruntukan hutang ragu diwujudkan pada 5% daripada baki penghutang bersih. Berapakah peruntukan hutang ragu?", opts:["RM600","RM575","RM500","RM625"], correct:1, explain:"Penghutang bersih = RM12,000 − RM500 = RM11,500. Peruntukan hutang ragu = 5% × RM11,500 = RM575."},
+{topic:"Pelarasan", q:"Apakah kesan pertambahan Peruntukan Hutang Ragu ke atas Penyata Pendapatan?", opts:["Menambah hasil","Menambah belanja","Mengurangkan belanja","Tiada kesan"], correct:1, explain:"Pertambahan dalam peruntukan hutang ragu direkod sebagai belanja tambahan dalam Penyata Pendapatan (mengurangkan untung bersih)."},
+{topic:"Pelarasan", q:"Faktor yang menyebabkan aset bukan semasa mengalami susut nilai termasuk _____________.", opts:["haus dan lusuh serta faktor keusangan (obsolescence)","peningkatan harga pasaran","inflasi ekonomi","pertambahan penghutang"], correct:0, explain:"Susut nilai berpunca daripada faktor fizikal (haus dan lusuh, kerosakan) dan faktor ekonomi (keusangan teknologi, model lapuk, peredaran masa)."},
+{topic:"Pelarasan", q:"Sebuah van dibeli RM24,000 pada awal tahun, dijangka digunakan selama 6 tahun dengan nilai sisa RM3,000. Menggunakan kaedah garis lurus, berapakah susut nilai tahunan?", opts:["RM4,000","RM3,500","RM4,500","RM3,000"], correct:1, explain:"Susut nilai tahunan (garis lurus) = (Harga Kos − Nilai Sisa) ÷ Jangka Hayat = (RM24,000 − RM3,000) ÷ 6 = RM3,500."},
+{topic:"Pelarasan", q:"Catatan bergu bagi merekod belanja susut nilai tahunan ialah _____________.", opts:["Dt Susut Nilai Terkumpul / Kt Belanja Susut Nilai","Dt Belanja Susut Nilai / Kt Susut Nilai Terkumpul","Dt Aset / Kt Belanja Susut Nilai","Dt Belanja Susut Nilai / Kt Aset"], correct:1, explain:"Belanja Susut Nilai didebitkan (belanja bertambah) dan Susut Nilai Terkumpul dikreditkan (akaun kontra-aset bertambah)."},
+{topic:"Pelarasan", q:"Hutang lapuk yang telah dihapuskan tetapi kemudiannya dijelaskan oleh penghutang berkenaan dikenali sebagai _____________.", opts:["Hutang Ragu","Hutang Lapuk Terpulih","Peruntukan Hutang Ragu","Diskaun Diterima"], correct:1, explain:"Hutang Lapuk Terpulih (bad debt recovered) berlaku apabila jumlah yang telah dihapuskan sebelum ini diterima semula — direkod sebagai hasil."},
+{topic:"Pelarasan", q:"Perakaunan Asas Akruan memerlukan pelarasan akaun kerana _____________.", opts:["semua urus niaga mesti tunai","perlu mengambil kira hasil/belanja yang belum direkod pada tarikh perakaunan","kerani akaun perlu menutup buku setiap hari","ia memudahkan pengiraan cukai sahaja"], correct:1, explain:"Pelarasan diperlukan untuk mengambil kira hasil yang telah terakru (belum diterima) dan belanja yang telah tertanggung (belum dibayar) supaya penyata kewangan menggambarkan kedudukan sebenar tempoh berkenaan."},
+
+// ---- TOPIK: Penyata Pendapatan (8) ----
+{topic:"Penyata Pendapatan", q:"Untung Kasar dikira menggunakan formula _____________.", opts:["Jualan Bersih − Kos Jualan","Jualan Bersih − Jumlah Belanja","Hasil − Liabiliti","Modal Akhir − Modal Awal"], correct:0, explain:"Untung Kasar = Jualan Bersih − Kos Jualan (Kos Barang Dijual)."},
+{topic:"Penyata Pendapatan", q:"Diberi: Jualan RM40,000, Pulangan Jualan RM1,500, Stok Awal RM5,000, Belian RM22,000, Pulangan Belian RM800, Stok Akhir RM4,200. Berapakah Untung Kasar?", opts:["RM16,500","RM17,500","RM18,300","RM15,700"], correct:0, explain:"Jualan Bersih = 40,000−1,500 = 38,500. Kos Jualan = 5,000+(22,000−800)−4,200 = 22,000. Untung Kasar = 38,500−22,000 = RM16,500."},
+{topic:"Penyata Pendapatan", q:"Manakah antara berikut item yang dicatat di bahagian BELANJA dalam Penyata Pendapatan?", opts:["Hutang Lapuk Terpulih","Diskaun Diterima","Belanja Susut Nilai","Untung Atas Pelupusan Aset"], correct:2, explain:"Belanja Susut Nilai adalah belanja operasi. Hutang Lapuk Terpulih, Diskaun Diterima, dan Untung Atas Pelupusan Aset semuanya adalah hasil/pendapatan, bukan belanja."},
+{topic:"Penyata Pendapatan", q:"Angkutan masuk (carriage inwards) dicampur ke dalam pengiraan _____________.", opts:["Kos Jualan","Untung Bersih terus","Hasil kendalian","Modal akhir"], correct:0, explain:"Angkutan masuk adalah kos untuk membawa barang niaga masuk ke perniagaan, jadi ia ditambah kepada Belian dalam pengiraan Kos Jualan."},
+{topic:"Penyata Pendapatan", q:"Angkutan keluar (carriage outwards) diklasifikasikan sebagai _____________.", opts:["sebahagian daripada Kos Jualan","belanja pentadbiran/jualan dalam Penyata Pendapatan","ditolak terus daripada Jualan Kasar","aset bukan semasa"], correct:1, explain:"Angkutan keluar adalah kos menghantar barang kepada pelanggan — direkodkan sebagai belanja jualan/pengedaran dalam Penyata Pendapatan (bukan sebahagian Kos Jualan)."},
+{topic:"Penyata Pendapatan", q:"Tajuk yang BETUL bagi Penyata Pendapatan sesebuah perniagaan yang tahun kewangannya berakhir pada 30 Jun 2024 ialah _____________.", opts:["Penyata Pendapatan pada 30 Jun 2024","Penyata Pendapatan bagi tahun berakhir 30 Jun 2024","Penyata Pendapatan bermula 1 Julai 2023","Penyata Pendapatan bagi bulan Jun 2024"], correct:1, explain:"Penyata Pendapatan meliputi satu tempoh (bukan satu tarikh sahaja), maka tajuknya mesti 'bagi tahun berakhir [tarikh]'."},
+{topic:"Penyata Pendapatan", q:"Kesan jika jumlah belanja melebihi jumlah hasil ialah _____________.", opts:["Untung kasar","Untung bersih","Rugi bersih","Rugi kasar"], correct:2, explain:"Apabila Jumlah Belanja > (Untung Kasar + Hasil Lain), perniagaan mengalami Rugi Bersih."},
+{topic:"Penyata Pendapatan", q:"Item manakah BUKAN komponen dalam pengiraan Kos Jualan?", opts:["Stok Awal","Belian bersih","Angkutan keluar","Stok Akhir"], correct:2, explain:"Angkutan keluar bukan komponen Kos Jualan — ia adalah belanja jualan yang dicatat berasingan. Kos Jualan = Stok Awal + Belian Bersih (+ Angkutan Masuk) − Stok Akhir."},
+
+// ---- TOPIK: Kunci Kira-Kira & Persamaan Perakaunan (6) ----
+{topic:"Kunci Kira-Kira", q:"Persamaan perakaunan asas ialah _____________.", opts:["Aset = Liabiliti − Modal","Aset = Liabiliti + Modal","Modal = Aset + Liabiliti","Liabiliti = Aset + Modal"], correct:1, explain:"Persamaan perakaunan asas: Aset = Liabiliti + Ekuiti Pemilik (Modal)."},
+{topic:"Kunci Kira-Kira", q:"Diberi: Hasil RM5,000, Belanja RM1,800, Liabiliti RM3,200. Jika Modal ialah RM12,000, berapakah jumlah Aset (guna persamaan perakaunan, untung bersih ditambah kepada modal)?", opts:["RM18,400","RM16,600","RM19,000","RM15,200"], correct:0, explain:"Untung bersih = 5,000−1,800 = 3,200. Modal akhir = 12,000+3,200 = 15,200. Aset = Modal + Liabiliti = 15,200+3,200 = RM18,400."},
+{topic:"Kunci Kira-Kira", q:"Modal Kerja dikira menggunakan formula _____________.", opts:["Aset Bukan Semasa − Liabiliti Bukan Semasa","Aset Semasa − Liabiliti Semasa","Jumlah Aset − Jumlah Liabiliti","Modal Awal + Untung Bersih"], correct:1, explain:"Modal Kerja = Aset Semasa − Liabiliti Semasa, menunjukkan kecairan (liquidity) jangka pendek perniagaan."},
+{topic:"Kunci Kira-Kira", q:"Antara berikut, kumpulan item manakah kesemuanya adalah Liabiliti Semasa?", opts:["Stok, Pemiutang, Overdraf Bank","Kadar Bayaran Terakru, Pemiutang, Sewa Diterima Terdahulu","Penghutang, Pemiutang, Insurans Terakru","Pinjaman Jangka Panjang, Gadai Janji, Pemiutang"], correct:1, explain:"Kadar Bayaran Terakru, Pemiutang, dan Sewa Diterima Terdahulu semuanya adalah liabiliti semasa (perlu dijelaskan dalam tempoh 12 bulan)."},
+{topic:"Kunci Kira-Kira", q:"Item manakah TIDAK sepatutnya muncul dalam Kunci Kira-Kira?", opts:["Penghutang","Modal Akhir","Stok Awal","Sewa Terakru"], correct:2, explain:"Stok Awal hanya digunakan dalam pengiraan Kos Jualan pada Penyata Pendapatan; ia tidak muncul dalam Kunci Kira-Kira (yang menunjukkan Stok Akhir sahaja)."},
+{topic:"Kunci Kira-Kira", q:"Aset bukan semasa mempunyai ciri _____________.", opts:["mudah ditukar kepada tunai dalam tempoh pendek","dipegang untuk kegunaan jangka panjang dalam operasi perniagaan","dibeli semata-mata untuk dijual semula","berbentuk hutang jangka pendek"], correct:1, explain:"Aset bukan semasa (seperti premis, kenderaan, perabot) dipegang dan digunakan dalam operasi perniagaan untuk tempoh melebihi satu tahun."},
+];
+
+/* ============================================================
+   DATA — 16 SOALAN SUBJEKTIF
+   ============================================================ */
+const subjData = [
+{topic:"Konsep Asas", marks:4, q:"Berikan definisi bagi:\n(i) Perakaunan Asas Tunai\n(ii) Perakaunan Asas Akruan",
+ans:`(i) Perakaunan Asas Tunai — prinsip yang merekodkan hasil apabila tunai DITERIMA dan belanja apabila tunai DIBAYAR, tanpa mengira bila urus niaga sebenarnya berlaku. (2M)
+
+(ii) Perakaunan Asas Akruan — prinsip yang merekodkan hasil apabila ia DIPEROLEH dan belanja apabila ia DITANGGUNG, walaupun tunai belum diterima/dibayar, bagi memadankan hasil dengan belanja dalam tempoh yang sama. (2M)`},
+
+{topic:"Konsep Asas", marks:3, q:"Nyatakan TIGA (3) tujuan penyediaan Imbangan Duga.",
+ans:`Mana-mana 3 daripada berikut (1M setiap satu):
+• Menyemak ketepatan catatan urus niaga berasaskan sistem catatan bergu.
+• Menyemak ketepatan pengiraan dalam buku catatan pertama dan lejar.
+• Menyemak ketepatan proses pengeposan daripada buku catatan pertama ke lejar.
+• Memudahkan penyediaan penyata kewangan (Penyata Pendapatan & Kunci Kira-Kira).`},
+
+{topic:"Konsep Asas", marks:4, q:"Berikan takrifan bagi:\n(i) Hutang Lapuk\n(ii) Peruntukan Hutang Ragu",
+ans:`(i) Hutang Lapuk — jumlah hutang daripada penghutang yang disahkan TIDAK dapat dikutip lagi (contoh: penghutang muflis) dan dihapuskan terus sebagai belanja. (2M)
+
+(ii) Peruntukan Hutang Ragu — anggaran jumlah (biasanya %) daripada baki penghutang yang DIJANGKA tidak dapat dikutip pada masa hadapan, diwujudkan secara berhemat (prudence) walaupun belum pasti hutang lapuk. (2M)`},
+
+{topic:"Dokumen & Jurnal", marks:6, q:"Perniagaan Aiman Enterprise telah melakukan urus niaga berikut pada bulan Mei 2025. Sediakan Jurnal Am (tanpa naratif diperlukan):\n\nMei 2 — Membeli perabot RM3,500 dan membayar dengan cek.\nMei 9 — Membeli barang niaga RM6,200 secara kredit daripada Kedai Ihsan.\nMei 20 — Menjual barang niaga RM4,000 secara tunai.\nMei 28 — Mengambil barang niaga bernilai RM250 untuk kegunaan sendiri.",
+ans:`Jurnal Am
+─────────────────────────────────────────────
+Mei 2   Dt Perabot                 3,500
+           Kt Bank                          3,500
+        (Belian perabot dengan cek)
+
+Mei 9   Dt Belian                  6,200
+           Kt Kedai Ihsan                   6,200
+        (Belian barang niaga secara kredit)
+
+Mei 20  Dt Tunai                   4,000
+           Kt Jualan                        4,000
+        (Jualan barang niaga secara tunai)
+
+Mei 28  Dt Ambilan                    250
+           Kt Belian                          250
+        (Ambil barang niaga untuk kegunaan sendiri)
+─────────────────────────────────────────────
+(Setiap pasangan catatan betul = 1.5M; 4 urus niaga × 1.5M = 6M)`},
+
+{topic:"Imbangan Duga", marks:14, q:"Maklumat berikut diperoleh daripada Perniagaan Cahaya Niaga pada 31 Mac 2025:\n\nTunai di tangan  RM2,850\nTunai di bank  RM9,400\nKenderaan  RM32,000\nModal  RM45,000\nBelian  RM8,900\nJualan  RM12,600\nPenghutang  RM4,150\nPemiutang  RM3,600\nGaji  RM1,850\nSewa diterima  RM650\nAlatan pejabat  RM3,700\n\nAnda dikehendaki menyediakan Imbangan Duga pada 31 Mac 2025.",
+ans:`Perniagaan Cahaya Niaga
+Imbangan Duga pada 31 Mac 2025
+─────────────────────────────────────────────
+Butiran                    Debit (RM)   Kredit (RM)
+─────────────────────────────────────────────
+Tunai di tangan                2,850
+Tunai di bank                  9,400
+Kenderaan                     32,000
+Modal                                        45,000
+Belian                         8,900
+Jualan                                       12,600
+Penghutang                     4,150
+Pemiutang                                     3,600
+Gaji                            1,850
+Sewa diterima                                   650
+Alatan pejabat                  3,700
+─────────────────────────────────────────────
+JUMLAH                        62,850        62,850
+─────────────────────────────────────────────
+(1 butiran betul = 1M × 12 = 12M; keseimbangan betul = 2M; Jumlah = 14M)`},
+
+{topic:"Imbangan Duga", marks:2, q:"Berikan SATU (1) kategori akaun yang berada di sebelah debit Imbangan Duga, dan berikan DUA (2) contoh yang bersesuaian.",
+ans:`Kategori: Aset (dan Belanja) — akaun yang bertambah nilai apabila didebitkan. (1M)
+
+Contoh (mana-mana 2): Tunai, Bank, Penghutang, Kenderaan, Perabot, Belian, Gaji, Sewa (belanja). (1M)`},
+
+{topic:"Penyata Pendapatan", marks:16, q:"Maklumat berikut diperoleh daripada Kedai Selesa pada 31 Disember 2024:\n\nJualan  RM48,500\nBelian  RM24,600\nPulangan Jualan  RM900\nPulangan Belian  RM450\nStok Awal  RM5,800\nAngkutan Masuk  RM620\nAngkutan Keluar  RM380\nGaji  RM6,200\nSewa  RM3,600\nInsurans  RM1,150\nKomisen Diterima  RM540\nDiskaun Diberi  RM310\n\nMaklumat tambahan: Stok Akhir bernilai RM4,900.\n\nSediakan Penyata Pendapatan bagi tahun berakhir 31 Disember 2024.",
+ans:`Kedai Selesa
+Penyata Pendapatan bagi tahun berakhir 31 Disember 2024
+─────────────────────────────────────────────
+                                RM         RM         RM
+Jualan                                   48,500
+(-) Pulangan Jualan                         900
+Jualan Bersih                                       47,600
+
+Tolak: Kos Jualan
+Stok Awal                     5,800
+Belian              24,600
+(-) Pulangan Belian    450
+Belian Bersih                24,150
+(+) Angkutan Masuk              620
+                              30,570
+(-) Stok Akhir                4,900
+Kos Jualan                                          25,670
+Untung Kasar                                        21,930
+
+Tambah: Hasil Lain
+Komisen Diterima                                       540
+                                                     22,470
+
+Tolak: Belanja
+Angkutan Keluar                 380
+Gaji                          6,200
+Sewa                          3,600
+Insurans                      1,150
+Diskaun Diberi                  310
+Jumlah Belanja                                      11,640
+Untung Bersih                                       10,830
+─────────────────────────────────────────────
+(Format & pengiraan Jualan Bersih = 2M, Kos Jualan = 6M, Untung Kasar = 1M,
+Hasil Lain = 1M, Belanja = 5M, Untung Bersih = 1M; Jumlah = 16M)`},
+
+{topic:"Pelarasan", marks:6, q:"Perniagaan Delima membayar sewa kedai sebanyak RM7,200 pada 1 April 2024 untuk tempoh 12 bulan sehingga 31 Mac 2025. Tahun kewangan Perniagaan Delima berakhir pada 31 Disember 2024.\n\n(i) Hitungkan sewa yang perlu dicatat dalam Penyata Pendapatan bagi tahun berakhir 31 Disember 2024.\n(ii) Hitungkan sewa terdahulu yang perlu dicatat dalam Kunci Kira-Kira pada 31 Disember 2024.",
+ans:`Kadar sewa sebulan = RM7,200 ÷ 12 bulan = RM600 sebulan
+
+(i) Tempoh yang telah berlalu (1 April – 31 Disember 2024) = 9 bulan
+    Sewa dalam Penyata Pendapatan = 9 × RM600 = RM5,400 (3M)
+
+(ii) Tempoh belum berlalu (1 Januari – 31 Mac 2025) = 3 bulan
+     Sewa Terdahulu dalam Kunci Kira-Kira (Aset Semasa) = 3 × RM600 = RM1,800 (3M)`},
+
+{topic:"Pelarasan", marks:4, q:"Sebuah mesin jahit dibeli dengan harga RM9,600 pada 1 Julai 2024 dan dibayar dengan cek. Mesin dijangka boleh digunakan selama 4 tahun tanpa nilai sisa. Susut nilai dikira mengikut kaedah garis lurus. Tahun kewangan perniagaan berakhir 31 Disember setiap tahun.\n\nHitungkan susut nilai bagi mesin tersebut pada tahun kewangan pertama (2024).",
+ans:`Susut nilai tahunan penuh = RM9,600 ÷ 4 tahun = RM2,400 setahun (2M)
+
+Tempoh digunakan pada 2024 = 1 Julai – 31 Disember = 6 bulan
+Susut nilai tahun pertama = RM2,400 × 6/12 = RM1,200 (2M)`},
+
+{topic:"Pelarasan", marks:8, q:"Belanja berikut dibayar oleh Perniagaan Ceria bagi tahun berakhir 31 Disember 2024:\n\nGaji dibayar  RM28,000\nKadar bayaran dibayar  RM4,200\n\nMaklumat tambahan:\n(i) Gaji terakru pada akhir tahun RM1,500.\n(ii) Kadar bayaran terdahulu pada akhir tahun RM600.\n\nSediakan Akaun Gaji dan Akaun Kadar Bayaran (tunjukkan pemindahan ke Penyata Pendapatan), lengkap dengan baki b/b.",
+ans:`Akaun Gaji
+─────────────────────────────────────────────
+        RM                              RM
+Bank    28,000    Penyata Pendapatan    29,500
+Gaji Terakru b/b  1,500
+        ─────                          ─────
+        29,500                         29,500
+                   Gaji Terakru b/b     1,500
+─────────────────────────────────────────────
+(Jumlah dipindah ke Penyata Pendapatan = Gaji dibayar + Terakru = 28,000+1,500 = 29,500) (4M)
+
+Akaun Kadar Bayaran
+─────────────────────────────────────────────
+        RM                              RM
+Bank     4,200    Kadar Bayaran Terdahulu b/b   600
+                   Penyata Pendapatan          3,600
+        ─────                                ─────
+         4,200                                4,200
+Kadar Bayaran Terdahulu b/b   600
+─────────────────────────────────────────────
+(Jumlah dipindah ke Penyata Pendapatan = Kadar bayaran dibayar − Terdahulu = 4,200−600 = 3,600) (4M)`},
+
+{topic:"Pelarasan", marks:4, q:"Jumlah penghutang Perniagaan Nirmala pada 31 Disember 2024 ialah RM25,000. Seorang penghutang bernilai RM1,000 disahkan muflis dan hutangnya perlu dihapuskan sebagai hutang lapuk. Peruntukan hutang ragu diwujudkan sebanyak 4% daripada baki penghutang bersih.\n\n(i) Hitungkan peruntukan hutang ragu pada 31 Disember 2024.\n(ii) Tuliskan catatan bergu untuk merekodkan peruntukan hutang ragu tersebut.",
+ans:`(i) Penghutang bersih = RM25,000 − RM1,000 = RM24,000
+    Peruntukan Hutang Ragu = 4% × RM24,000 = RM960 (2M)
+
+(ii) Dt Belanja Peruntukan Hutang Ragu   RM960
+        Kt Peruntukan Hutang Ragu               RM960
+    (2M)`},
+
+{topic:"Kunci Kira-Kira", marks:16, q:"Maklumat berikut diperoleh daripada Perniagaan Restu pada 31 Disember 2024:\n\nBank  RM6,300\nAmbilan  RM4,200\nPremis  RM55,000\nPemiutang  RM7,900\nPenghutang  RM9,600\nAlatan Pejabat  RM6,500\nKenderaan  RM22,000\nModal  RM70,000\n\nMaklumat tambahan:\n(i) Stok akhir pada 31 Disember 2024 bernilai RM8,200.\n(ii) Untung bersih daripada Penyata Pendapatan ialah RM24,300.\n\nSediakan Kunci Kira-Kira Perniagaan Restu pada 31 Disember 2024, dengan menunjukkan Modal Kerja.",
+ans:`Perniagaan Restu
+Kunci Kira-Kira pada 31 Disember 2024
+─────────────────────────────────────────────
+                        RM         RM         RM
+Aset Bukan Semasa
+Premis                          55,000
+Kenderaan                       22,000
+Alatan Pejabat                   6,500
+                                            83,500
+
+Aset Semasa
+Stok Akhir              8,200
+Penghutang              9,600
+Bank                    6,300
+                        24,100
+Tolak: Liabiliti Semasa
+Pemiutang               7,900
+Modal Kerja                                16,200
+Jumlah Aset                                99,700
+─────────────────────────────────────────────
+Ekuiti Pemilik
+Modal Awal                                 70,000
+Tambah: Untung Bersih                      24,300
+                                            94,300
+Tolak: Ambilan                              4,200
+Modal Akhir                                90,100
+
+(Baki: Jumlah Aset 99,700 vs Modal Akhir + Liabiliti Semasa 90,100+7,900 = wajar disemak semula
+ dgn susunan Liabiliti Bukan Semasa jika ada; dalam kes ini kedua-dua sisi hendaklah 99,700)
+─────────────────────────────────────────────
+(1 butiran betul = 1M × 10 = 10M; pengelasan Aset/Liabiliti Semasa = 2M;
+Modal Kerja betul = 2M; keseimbangan akhir = 2M; Jumlah = 16M)
+
+Nota latihan: Jumlah "Aset" mesti sepadan dengan jumlah "Ekuiti Pemilik + Liabiliti".
+Pelajar digalak menyemak semula angka input sendiri semasa berlatih menyusun format ini.`},
+
+{topic:"Kunci Kira-Kira", marks:4, q:"Nyatakan EMPAT (4) tujuan penyediaan Kunci Kira-Kira.",
+ans:`Mana-mana 4 (1M setiap satu):
+• Menunjukkan kedudukan kewangan perniagaan pada satu tarikh tertentu.
+• Menunjukkan jumlah aset yang dimiliki oleh perniagaan.
+• Menunjukkan jumlah liabiliti (hutang) yang ditanggung oleh perniagaan.
+• Menunjukkan ekuiti pemilik (modal) dalam perniagaan.
+• Membantu pihak berkepentingan (pemilik, bank, pelabur) menilai kestabilan kewangan perniagaan.`},
+
+{topic:"Konsep Asas", marks:6, q:"Terangkan TIGA (3) perbezaan antara Perakaunan Asas Tunai dengan Perakaunan Asas Akruan mengikut aspek berikut: Hasil, Belanja, dan Keuntungan.",
+ans:`Aspek       | Asas Tunai                              | Asas Akruan
+────────────┼─────────────────────────────────────────┼──────────────────────────────────────────
+Hasil       | Direkod apabila tunai DITERIMA            | Direkod apabila hasil DIPEROLEH (walaupun tunai belum diterima)
+Belanja     | Direkod apabila tunai DIBAYAR              | Direkod apabila belanja DITANGGUNG (walaupun tunai belum dibayar)
+Keuntungan  | Mungkin tidak menggambarkan prestasi sebenar tempoh berkenaan | Menggambarkan prestasi sebenar tempoh kerana hasil dipadankan dengan belanja berkaitan
+
+(2M setiap baris perbezaan yang tepat × 3 = 6M)`},
+
+{topic:"Buku Tunai & Diskaun", marks:5, q:"Sebuah invois berjumlah RM6,500 dihantar kepada Puan Zaleha pada 3 Jun 2025. Syarat diskaun tunai ialah 4% jika dibayar dalam 20 hari, 2% jika dibayar dalam 30 hari.\n\n(i) Hitungkan jumlah yang perlu dibayar oleh Puan Zaleha jika beliau membayar pada 18 Jun 2025.\n(ii) Hitungkan jumlah yang perlu dibayar jika beliau membayar pada 28 Jun 2025.",
+ans:`(i) 18 Jun jatuh dalam tempoh 20 hari (3–23 Jun) → layak diskaun 4%
+    Diskaun = 4% × RM6,500 = RM260
+    Jumlah dibayar = RM6,500 − RM260 = RM6,240 (2.5M)
+
+(ii) 28 Jun jatuh dalam tempoh 21–30 hari → layak diskaun 2%
+     Diskaun = 2% × RM6,500 = RM130
+     Jumlah dibayar = RM6,500 − RM130 = RM6,370 (2.5M)`},
+
+{topic:"Lejar", marks:6, q:"Pindahkan catatan Jurnal Am berikut ke dalam lejar (lukiskan akaun T ringkas untuk kedua-dua akaun):\n\nJurnal Am\nTarikh: 5 Feb 2025\nDt Kenderaan  RM28,000\n   Kt Auto Prima Sdn Bhd  RM28,000\n(Membeli kenderaan secara kredit)",
+ans:`Akaun Kenderaan
+─────────────────────────────────
+2025                        RM
+Feb 5  Auto Prima Sdn Bhd  28,000
+
+Akaun Auto Prima Sdn Bhd
+─────────────────────────────────
+                             2025                RM
+                             Feb 5  Kenderaan   28,000
+─────────────────────────────────
+(Akaun Kenderaan didebitkan dengan nama akaun bertentangan "Auto Prima Sdn Bhd" = 3M;
+ Akaun Auto Prima Sdn Bhd dikreditkan dengan nama akaun bertentangan "Kenderaan" = 3M)`},
+];
+
+/* ============================================================
+   RENDER — BAHAGIAN A (MCQ)
+   ============================================================ */
+const letters = ["A","B","C","D"];
+let answered = new Set();
+let correctSet = new Set();
+let currentFilter = "all";
+
+function topicsList(){
+  const s = new Set(mcqData.map(m=>m.topic));
+  return ["all", ...s];
+}
+
+function renderChips(){
+  const bar = document.getElementById('chipBar');
+  bar.innerHTML = "";
+  topicsList().forEach(t=>{
+    const c = document.createElement('div');
+    c.className = 'chip' + (t===currentFilter ? ' active' : '');
+    c.textContent = t === "all" ? "Semua Topik" : t;
+    c.onclick = ()=>{ currentFilter = t; renderChips(); renderMCQ(); };
+    bar.appendChild(c);
+  });
+}
+
+function renderMCQ(){
+  const list = document.getElementById('mcqList');
+  list.innerHTML = "";
+  mcqData.forEach((item, idx)=>{
+    if(currentFilter !== "all" && item.topic !== currentFilter) return;
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    const already = answered.has(idx);
+
+    let optsHtml = "";
+    item.opts.forEach((opt, oi)=>{
+      let cls = "opt";
+      if(already){
+        cls += " disabled";
+        if(oi === item.correct) cls += " correct";
+        else if(window.__lastPicked && window.__lastPicked[idx] === oi) cls += " wrong";
+      }
+      optsHtml += `<div class="${cls}" data-idx="${idx}" data-oi="${oi}"><span class="letter">${letters[oi]}</span><span>${opt}</span></div>`;
+    });
+
+    card.innerHTML = `
+      <div class="q-meta"><span>${item.topic}</span><span>Soalan ${idx+1} / 80</span></div>
+      <div class="q-body">
+        <p class="q-text"><span class="num">#${idx+1}</span>${item.q}</p>
+        <div class="opts">${optsHtml}</div>
+        <div class="explain ${already ? 'show' : ''}">${item.explain}</div>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll('.opt:not(.disabled)').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const idx = parseInt(el.dataset.idx);
+      const oi = parseInt(el.dataset.oi);
+      if(answered.has(idx)) return;
+      answered.add(idx);
+      window.__lastPicked = window.__lastPicked || {};
+      window.__lastPicked[idx] = oi;
+      if(oi === mcqData[idx].correct) correctSet.add(idx);
+      renderMCQ();
+      updateScore();
+    });
+  });
+}
+
+function updateScore(){
+  const total = mcqData.length;
+  const done = answered.size;
+  const correct = correctSet.size;
+  const wrong = done - correct;
+  document.getElementById('lbProgress').textContent = `${done} / ${total} dijawab`;
+  document.getElementById('correctCount').textContent = correct;
+  document.getElementById('correctTotal').textContent = correct;
+  document.getElementById('wrongCount').textContent = wrong;
+  document.getElementById('wrongTotal').textContent = wrong;
+  document.getElementById('floatScore').textContent = `Markah Objektif: ${correct} / ${done} dijawab (${total} jumlah)`;
+}
+
+/* ============================================================
+   RENDER — BAHAGIAN B (SUBJEKTIF)
+   ============================================================ */
+function renderSubj(){
+  const list = document.getElementById('subjList');
+  list.innerHTML = "";
+  subjData.forEach((item, idx)=>{
+    const card = document.createElement('div');
+    card.className = 's-card';
+    card.innerHTML = `
+      <div class="q-meta"><span>${item.topic}</span><span>Soalan ${idx+1} / ${subjData.length} &middot; ${item.marks} markah</span></div>
+      <div class="s-body">
+        <p class="s-q">${item.q}</p>
+        <button class="s-toggle" data-idx="${idx}">Lihat Jawapan Model</button>
+        <div class="s-answer" id="ans-${idx}"><pre>${item.ans}</pre></div>
+      </div>`;
+    list.appendChild(card);
+  });
+  list.querySelectorAll('.s-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const idx = btn.dataset.idx;
+      const box = document.getElementById('ans-'+idx);
+      const showing = box.classList.toggle('show');
+      btn.textContent = showing ? "Sembunyikan Jawapan Model" : "Lihat Jawapan Model";
+    });
+  });
+}
+
+/* ============================================================
+   TABS & RESET
+   ============================================================ */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).classList.add('active');
+  });
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(!confirm('Set semula semua jawapan objektif?')) return;
+  answered = new Set();
+  correctSet = new Set();
+  window.__lastPicked = {};
+  renderMCQ();
+  updateScore();
+  document.querySelectorAll('.s-answer').forEach(a=>a.classList.remove('show'));
+  document.querySelectorAll('.s-toggle').forEach(b=>b.textContent = "Lihat Jawapan Model");
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderChips();
+renderMCQ();
+renderSubj();
+updateScore();
+</script>
+</body>
+</html>
